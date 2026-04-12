@@ -1,0 +1,36 @@
+# FastAPI and web framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Database
+sqlalchemy
+asyncpg
+alembic
+
+# Authentication
+python-jose[cryptography]
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+
+# Validation and settings
+pydantic
+pydantic-settings
+
+# File handling
+aiofiles
+python-magic-bin
+
+# HTTP client (for Mailgun)
+httpx
+
+# Environment
+python-dotenv
+
+# Date/time handling
+python-dateutil
+
+# Testing
+pytest
+pytest-asyncio
+httpx

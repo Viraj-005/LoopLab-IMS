@@ -1,0 +1,27 @@
+# ─── GLOBAL GOVERNANCE ───
+# Base environment and security
+.env
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── IDE CONFIGURATION ───
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.settings/
+
+# ─── SYSTEM ───
+.pylab/
+__pycache__/
+
+# ─── MODULAR DELEGATION ───
+# Exclusions are also handled within /backend and /frontend
+# However, we keep these as a secondary safety layer for the root:
+backend/.venv/
+frontend/node_modules/
+backend/uploads/*
+!backend/uploads/.gitkeep

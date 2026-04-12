@@ -1,0 +1,19 @@
+# ─── BACKEND ASSETS ───
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+*.sqlite3
+.env
+
+# Migration Artifacts
+!add_tags_column.py
+
+# Intern Assets & Stream Media
+uploads/*
+!uploads/.gitkeep
+
+# Project Specific
+.ipynb_checkpoints/
