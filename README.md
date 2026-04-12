@@ -2,7 +2,7 @@
 
 # [IMS] Intern Management System · Protocol v2.0
 
-![IMS Hero Banner](C:/Users/DELL/.gemini/antigravity/brain/faf2e830-2dc0-4816-ab39-0c8eb1fe4b2b/ims_hero_banner_1775953123760.png)
+![IMS Hero Banner](frontend/src/assets/ims_hero_banner.png)
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Modern-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
