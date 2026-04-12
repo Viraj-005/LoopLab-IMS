@@ -109,7 +109,7 @@ GOOGLE_CLIENT_SECRET=your-google-secret
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=wxyo-gomr-uqnr-vbik  # Use Google App Password
+SMTP_PASSWORD=your-app-password-here  # Use Google App Password
 FROM_EMAIL=your-email@gmail.com
 ```
 
