@@ -9,6 +9,7 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import StatsCard from '../components/StatsCard';
+import Modal from '../components/Modal';
 import api from '../services/api';
 
 const Dashboard = () => {
@@ -16,38 +17,75 @@ const Dashboard = () => {
   const [activity, setActivity] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showFullLog, setShowFullLog] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [intervalDays, setIntervalDays] = useState(7); // Default to 7 days as requested
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showControls, setShowControls] = useState(false);
+
+  const statsIntervals = [
+    { label: 'Last 30 Days', value: 30 },
+    { label: 'Last 90 Days', value: 90 },
+    { label: 'Last 365 Days', value: 365 },
+  ];
+
+  const [categories, setCategories] = useState(["All"]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
-        const [statsRes, activityRes, chartRes] = await Promise.all([
-          api.get('/dashboard/stats'),
-          api.get('/dashboard/activity'),
-          api.get('/dashboard/chart')
-        ]);
-        setStats(statsRes.data);
-        setActivity(activityRes.data);
-        
-        const mockData = [
-          { date: '2024-01-01', count: 45 },
-          { date: '2024-02-01', count: 52 },
-          { date: '2024-03-01', count: 78 },
-          { date: '2024-04-01', count: 65 },
-          { date: '2024-05-01', count: 90 },
-          { date: '2024-06-01', count: 120 },
-          { date: '2024-07-01', count: 95 },
-        ];
-        setChartData(chartRes.data && chartRes.data.length > 0 ? chartRes.data : mockData);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
+        const res = await api.get('/dashboard/categories');
+        if (res.data) setCategories(res.data);
+      } catch (e) {
+        console.error("Failed to fetch analytics categories:", e);
       }
     };
-    fetchData();
+    fetchCategories();
   }, []);
 
-  if (loading) return (
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const days = intervalDays;
+      const [statsRes, activityRes, chartRes] = await Promise.all([
+        api.get('/dashboard/stats'),
+        api.get('/dashboard/activity'),
+        api.get(`/dashboard/chart?days=${days}&category=${selectedCategory}`)
+      ]);
+      setStats(statsRes.data);
+      setActivity(activityRes.data);
+      setChartData(chartRes.data && chartRes.data.length > 0 ? chartRes.data : []);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [intervalDays, selectedCategory]);
+
+  const exportToCSV = () => {
+    const headers = "Date,Application Count\n";
+    const rows = chartData.map(d => `${d.date},${d.count}`).join("\n");
+    const blob = new Blob([headers + rows], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Application_Velocity_${selectedCategory.replace(/\s+/g, '_')}_${intervalDays}d.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setShowControls(false);
+  };
+
+  if (loading && !stats) return (
     <div className="flex items-center justify-center h-96">
       <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
     </div>
@@ -70,15 +108,27 @@ const Dashboard = () => {
           <h1 className="text-5xl font-black tracking-tight text-on-surface font-headline mb-2">IMS Intelligence</h1>
           <p className="text-on-surface-variant font-medium text-lg">System status: <span className="text-primary font-black underline decoration-2 underline-offset-4">Optimal Efficiency</span>. Overseeing all intern cycles.</p>
         </div>
-        <div className="hidden lg:block relative group">
-           <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-           <button className="relative px-8 py-3 bg-white rounded-xl leading-none flex items-center divide-x divide-gray-200 shadow-xl overflow-hidden glass-card">
-              <span className="flex items-center space-x-3 pr-6">
-                <span className="material-symbols-outlined text-primary">analytics</span>
-                <span className="text-on-surface font-black text-xs uppercase tracking-widest font-headline">Protocol Alpha</span>
-              </span>
-              <span className="pl-6 text-primary font-black text-xs uppercase tracking-widest font-headline">Active</span>
-           </button>
+        <div className="hidden lg:flex flex-col items-end gap-3">
+           <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <button className="relative px-8 py-3 bg-white rounded-xl leading-none flex items-center divide-x divide-gray-200 shadow-xl overflow-hidden glass-card cursor-default">
+                 <span className="flex items-center space-x-3 pr-6">
+                   <span className="material-symbols-outlined text-primary">analytics</span>
+                   <span className="text-on-surface font-black text-xs uppercase tracking-widest font-headline">Protocol Alpha</span>
+                 </span>
+                 <span className="pl-6 text-primary font-black text-xs uppercase tracking-widest font-headline">Active</span>
+              </button>
+           </div>
+           
+           <div className="text-right mr-1">
+              <p className="text-[11px] font-black uppercase tracking-widest text-slate-500">
+                {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 mt-1">
+                 {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} 
+                 <span className="text-slate-300 ml-1">LOCAL</span>
+              </p>
+           </div>
         </div>
       </header>
 
@@ -104,15 +154,67 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
         {/* Analytics Section */}
-        <div className="xl:col-span-2 glass-card p-10 rounded-[3rem] border-white ring-1 ring-slate-200/30">
+        <div className="xl:col-span-2 glass-card p-10 rounded-[3rem] border-white ring-1 ring-slate-200/30 overflow-visible relative">
           <div className="flex justify-between items-center mb-10">
              <div>
                 <h3 className="text-2xl font-black text-on-surface font-headline">Application Velocity</h3>
-                <p className="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-widest">Temporal Analysis - Last 7 Cycles</p>
+                <p className="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-widest">
+                  Temporal Analysis - {selectedCategory} Segment
+                </p>
              </div>
-             <button className="p-3 bg-primary/5 rounded-2xl text-primary hover:bg-primary hover:text-white tonal-transition">
-                <span className="material-symbols-outlined">filter_list</span>
-             </button>
+             <div className="relative">
+                <button 
+                   onClick={() => setShowControls(!showControls)}
+                   className={`p-3 rounded-2xl transition-all duration-300 ${showControls ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-primary/5 text-primary hover:bg-primary/10'}`}
+                >
+                   <span className="material-symbols-outlined">filter_list</span>
+                </button>
+
+                {showControls && (
+                   <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowControls(false)}></div>
+                      <div className="absolute right-0 mt-3 w-72 bg-white/95 backdrop-blur-xl rounded-3xl border border-white p-6 shadow-2xl z-20 animate-in zoom-in-95 duration-200 origin-top-right">
+                         <div className="space-y-6">
+                            <div>
+                               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Time Interval</p>
+                               <div className="grid grid-cols-2 gap-2">
+                                  {statsIntervals.map((itv) => (
+                                     <button 
+                                        key={itv.value}
+                                        onClick={() => { setIntervalDays(itv.value); setShowControls(false); }}
+                                        className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all ${intervalDays === itv.value ? 'bg-primary text-white' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                                     >
+                                        {itv.label}
+                                     </button>
+                                  ))}
+                               </div>
+                            </div>
+
+                            <div>
+                               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Segment Data</p>
+                               <select 
+                                  value={selectedCategory}
+                                  onChange={(e) => { setSelectedCategory(e.target.value); setShowControls(false); }}
+                                  className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer"
+                               >
+                                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                               </select>
+                            </div>
+
+                            <div className="pt-4 border-t border-slate-100">
+                               <button 
+                                 onClick={exportToCSV}
+                                 className="w-full py-3 hero-gradient text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                               >
+                                  <span className="material-symbols-outlined text-sm">download</span>
+                                  Export Report (CSV)
+                               </button>
+                            </div>
+                         </div>
+                      </div>
+                   </>
+                )}
+             </div>
           </div>
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
@@ -168,8 +270,8 @@ const Dashboard = () => {
               <span className="w-3 h-3 bg-success rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></span>
             </div>
             
-            <div className="space-y-8 flex-1 overflow-y-auto no-scrollbar pr-2">
-              {activity.map((item, i) => (
+            <div className="space-y-8 flex-1 overflow-y-hidden pr-2">
+              {activity.slice(0, 4).map((item, i) => (
                 <div key={item.id} className="relative pl-10 group cursor-default">
                   {/* Vertical line indicator */}
                   <div className="absolute left-[11px] top-8 bottom-[-20px] w-0.5 bg-primary/10 group-last:hidden"></div>
@@ -196,13 +298,47 @@ const Dashboard = () => {
                  </div>
               )}
             </div>
-            
-            <button className="mt-8 w-full py-4 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest tonal-transition hover:bg-slate-50 hover:shadow-lg">
-               Full Protocol Log
-            </button>
+            {activity.length > 4 && (
+              <button 
+                onClick={() => setShowFullLog(true)}
+                className="mt-8 w-full py-4 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest tonal-transition hover:bg-slate-50 hover:shadow-lg"
+              >
+                 Full Protocol Log
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={showFullLog}
+        onClose={() => setShowFullLog(false)}
+        title="Full Protocol Log"
+        size="lg"
+      >
+        <div className="space-y-8 max-h-[60vh] overflow-y-auto no-scrollbar pr-2 py-4">
+           {activity.map((item, i) => (
+             <div key={item.id} className="relative pl-10 group cursor-default">
+                 {/* Vertical line indicator */}
+                 <div className="absolute left-[11px] top-8 bottom-[-20px] w-0.5 bg-primary/10 group-last:hidden"></div>
+                 
+                 <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-white border-2 border-primary/20 flex items-center justify-center z-10 group-hover:border-primary transition-colors shadow-sm">
+                    <span className="w-2 h-2 rounded-full bg-primary/40 group-hover:bg-primary transition-colors"></span>
+                 </div>
+                 
+                 <div>
+                   <p className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-primary transition-colors mb-1 leading-relaxed">
+                     <span className="font-black text-slate-400 opacity-80 uppercase tracking-widest mr-2">{item.performed_by || 'SYSTEM'}</span> 
+                     {item.description}
+                   </p>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                     {new Date(item.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                   </p>
+                 </div>
+             </div>
+           ))}
+        </div>
+      </Modal>
     </div>
   );
 };

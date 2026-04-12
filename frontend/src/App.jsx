@@ -13,6 +13,8 @@ import { NotificationProvider } from './context/NotificationContext';
 
 // Base Pages
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 // Staff Pages
 import Dashboard from './pages/Dashboard';
@@ -24,6 +26,7 @@ import JobPosts from './pages/JobPosts';
 import CreateJobPost from './pages/CreateJobPost';
 import EditJobPost from './pages/EditJobPost';
 import UserManagement from './pages/cofounder/UserManagement';
+import InternRegistry from './pages/InternRegistry';
 
 // Intern Pages
 import OAuthCallback from './pages/intern/OAuthCallback';
@@ -125,6 +128,8 @@ const App = () => {
               )
             } 
           />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* OAuth Callback Handlers */}
           <Route path="/auth/callback/google" element={<OAuthCallback setUser={handleSetUser} />} />
@@ -180,6 +185,7 @@ const App = () => {
                         <Route path="/admin/users" element={<UserManagement />} />
                     )}
                     
+                    <Route path="/interns" element={<InternRegistry />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="*" element={<Navigate to="/dashboard" />} />
                   </Routes>

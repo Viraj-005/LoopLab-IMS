@@ -296,7 +296,13 @@ const InternDashboard = () => {
                     return mUrl.endsWith('.mp4') || mUrl.endsWith('.webm') ? (
                       <video src={mUrl} className="w-full h-full object-cover" autoPlay muted loop />
                     ) : (
-                      <img src={mUrl} alt="Job Visual" className="w-full h-full object-cover" />
+                      <img 
+                        src={mUrl} 
+                        alt="Job Visual" 
+                        loading="lazy"
+                        onLoad={(e) => e.target.style.opacity = 1}
+                        className="w-full h-full object-cover opacity-0 transition-opacity duration-500" 
+                      />
                     );
                   })()
                ) : (

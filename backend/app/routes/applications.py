@@ -14,7 +14,10 @@ from app.schemas.application import (
     Application as AppSchema, ApplicationCreate, ApplicationUpdate, 
     ApplicationList, ApplicationDetail, ApplicationNoteCreate, ApplicationEmailSend
 )
-from app.services.application_service import create_application, get_application, get_applications, update_application
+from app.services.application_service import (
+    create_application, get_application, get_applications, 
+    update_application, get_unique_roles
+)
 from app.services.auth_service import get_current_staff
 from app.services.email_service import email_service
 from app.models.notification import Notification
@@ -37,6 +40,7 @@ async def list_applications(
     source: Optional[ApplicationSource] = None,
     is_duplicate: Optional[bool] = Query(None, alias="is_duplicate"),
     is_spam: Optional[bool] = Query(None, alias="is_spam"),
+    role: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_staff)
 ) :
@@ -50,9 +54,19 @@ async def list_applications(
         search=search, 
         source=source, 
         is_duplicate=is_duplicate, 
-        is_spam=is_spam
+        is_spam=is_spam,
+        role=role
     )
     return {"items": items, "total": total, "page": page, "size": size}
+
+
+@router.get("/roles", response_model=List[str])
+async def list_unique_roles(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_staff)
+):
+    """Get unique roles present in applications for filtering"""
+    return await get_unique_roles(db)
 
 
 @router.get("/{id}", response_model=ApplicationDetail)
@@ -115,6 +129,27 @@ async def download_cv(
     )
 
 
+@router.get("/{id}/cover-letter")
+async def download_cover_letter(
+    id: UUID,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_staff)
+):
+    """Download Cover Letter file"""
+    app = await get_application(db, id)
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+        
+    if not app.cover_letter_path:
+        raise HTTPException(status_code=404, detail="Cover letter not available")
+        
+    return FileResponse(
+        app.cover_letter_path, 
+        media_type='application/pdf',
+        content_disposition_type='inline'
+    )
+
+
 @router.post("/", response_model=AppSchema)
 async def create_new_application(
     background_tasks: BackgroundTasks,
@@ -122,19 +157,28 @@ async def create_new_application(
     applicant_name: Optional[str] = Form(None),
     applied_role: Optional[str] = Form(None),
     cv: UploadFile = File(...),
+    cover_letter: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_staff)
 ):
     """Manually create application (e.g. from admin panel)"""
     file_path, file_hash = await save_upload_file(cv)
     
+    cl_path = None
+    cl_filename = None
+    if cover_letter:
+        cl_path, _ = await save_upload_file(cover_letter)
+        cl_filename = cover_letter.filename
+        
     app_in = ApplicationCreate(
         email=email,
         applicant_name=applicant_name,
         applied_role=applied_role,
         cv_file_path=file_path,
         cv_hash=file_hash,
-        cv_original_filename=cv.filename
+        cv_original_filename=cv.filename,
+        cover_letter_path=cl_path,
+        cover_letter_original_filename=cl_filename
     )
     
     app = await create_application(db, app_in)

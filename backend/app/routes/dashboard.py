@@ -62,21 +62,42 @@ async def get_recent_activity(
 @router.get("/chart")
 async def get_chart_data(
     days: int = 30,
+    category: str = None,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_staff)
 ):
-    """Get applications over time for chart"""
-    # Simple grouping by date
-    # In production, use database date_trunc
+    """Get applications over time for chart with optional category filtering"""
+    from app.models.job_post import JobPost
+    
     start_date = datetime.utcnow() - timedelta(days=days)
     query = select(Application.received_at).where(Application.received_at >= start_date)
+    
+    if category and category != "All":
+        query = query.join(JobPost, Application.job_id == JobPost.id).where(JobPost.category == category)
+    
     result = await db.execute(query)
     dates = result.scalars().all()
     
-    # Process in python for simplicity in Phase 1
-    # Returns count per day
     from collections import Counter
     counts = Counter(d.date().isoformat() for d in dates)
     
-    sorted_data = [{"date": k, "count": v} for k, v in sorted(counts.items())]
-    return sorted_data
+    # Ensure all days in the range have an entry (even with 0) for a smoother chart
+    all_data = []
+    for i in range(days):
+        d = (datetime.utcnow().date() - timedelta(days=i)).isoformat()
+        all_data.append({"date": d, "count": counts.get(d, 0)})
+    
+    return sorted(all_data, key=lambda x: x["date"])
+
+
+@router.get("/categories")
+async def get_chart_categories(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_staff)
+):
+    """Get unique job categories currently in use for filtering"""
+    from app.models.job_post import JobPost
+    query = select(JobPost.category).distinct()
+    result = await db.execute(query)
+    categories = result.scalars().all()
+    return ["All"] + list(categories)

@@ -6,6 +6,7 @@ from app.models.timeline import ApplicationTimeline
 from app.models.email_template import EmailTemplate
 from app.models.job_post import JobPost
 from app.models.notification import Notification
+from app.models.settings import SystemSettings
 
 __all__ = [
     "User", 
@@ -17,5 +18,6 @@ __all__ = [
     "ApplicationTimeline", 
     "EmailTemplate", 
     "JobPost",
-    "Notification"
+    "Notification",
+    "SystemSettings"
 ]

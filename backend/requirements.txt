@@ -13,6 +13,10 @@ python-jose[cryptography]
 passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 
+# 2FA
+pyotp
+qrcode
+
 # Validation and settings
 pydantic
 pydantic-settings
@@ -21,8 +25,9 @@ pydantic-settings
 aiofiles
 python-magic-bin
 
-# HTTP client (for Mailgun)
+# HTTP client (for Mailgun) - keep for other API calls if needed
 httpx
+aiosmtplib
 
 # Environment
 python-dotenv

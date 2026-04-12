@@ -45,6 +45,12 @@ class User(Base):
     )
     refresh_token_hash: Mapped[str] = mapped_column(String(255), nullable=True)
 
+    # 2FA and Password Reset
+    is_2fa_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    totp_secret: Mapped[str] = mapped_column(String(255), nullable=True)
+    reset_token: Mapped[str] = mapped_column(String(255), nullable=True)
+    reset_token_expires: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False

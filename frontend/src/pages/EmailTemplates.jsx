@@ -67,16 +67,17 @@ const EmailTemplates = () => {
     try {
       if (currentTemplate) {
         await api.put(`/email-templates/${currentTemplate.id}`, editFormData);
+        showNotification(`Protocol ${editFormData.name} updated successfully.`, "success");
       } else {
         await api.post('/email-templates/', editFormData);
-      showNotification(`Protocol ${editFormData.name} initialized successfully.`, "success");
+        showNotification(`Protocol ${editFormData.name} initialized successfully.`, "success");
+      }
+      setIsEditModalOpen(false);
+      fetchTemplates();
+    } catch (err) {
+      showNotification("Failed to synchronize template logic.", "error");
     }
-    setIsEditModalOpen(false);
-    fetchTemplates();
-  } catch (err) {
-    showNotification("Failed to synchronize template logic.", "error");
-  }
-};
+  };
 
   const openDeleteModal = (template) => {
     setCurrentTemplate(template);
@@ -290,7 +291,6 @@ const EmailTemplates = () => {
               >
                 <option value="formal">Protocol: Formal</option>
                 <option value="friendly">Protocol: Collaborative</option>
-                <option value="concise">Protocol: Immediate</option>
               </select>
             </div>
             <div className="flex flex-col justify-end pb-3">

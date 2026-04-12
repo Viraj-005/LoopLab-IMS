@@ -18,7 +18,9 @@ from app.routes import (
     intern_auth,
     intern_portal,
     cofounder,
-    notifications
+    notifications,
+    admin_interns,
+    settings as system_settings
 )
 from app.database import init_db
 
@@ -50,12 +52,14 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(intern_auth.router, prefix="/api")
 app.include_router(intern_portal.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
+app.include_router(system_settings.router, prefix="/api")
 app.include_router(cofounder.router, prefix="/api")
 app.include_router(applications.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(email_templates.router, prefix="/api")
 app.include_router(webhooks.router, prefix="/api")
 app.include_router(job_posts.router, prefix="/api")
+app.include_router(admin_interns.router, prefix="/api")
 
 # Static files for uploaded CVs
 os.makedirs(settings.upload_dir, exist_ok=True)
@@ -66,6 +70,10 @@ async def on_startup():
     # In development, we can auto-create tables
     from app.database import init_db
     await init_db()
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "timestamp": "reload-01"}
 
 @app.get("/")
 async def root():

@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from app.models.application import Application
 from app.schemas.application import ApplicationCreate
+from app.services.settings_service import get_system_settings
 
 async def check_spam(db: AsyncSession, app_data: ApplicationCreate) -> tuple[bool, str]:
     """
@@ -15,6 +16,11 @@ async def check_spam(db: AsyncSession, app_data: ApplicationCreate) -> tuple[boo
     """
     reasons = []
     is_spam = False
+    
+    # Check if spam detection is enabled
+    settings = await get_system_settings(db)
+    if not settings.enable_spam_detection:
+        return False, ""
     
     # 1. Missing CV
     if not app_data.cv_file_path:

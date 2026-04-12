@@ -7,6 +7,7 @@ from uuid import UUID
 from datetime import datetime
 from app.models.application import ApplicationStatus, ApplicationSource
 from app.schemas.timeline import ApplicationTimeline
+from app.schemas.job_post import JobPost
 
 
 class ApplicationBase(BaseModel):
@@ -26,6 +27,8 @@ class ApplicationCreate(ApplicationBase):
     cv_file_path: Optional[str] = None
     cv_hash: Optional[str] = None
     cv_original_filename: Optional[str] = None
+    cover_letter_path: Optional[str] = None
+    cover_letter_original_filename: Optional[str] = None
     received_at: Optional[datetime] = None
 
 
@@ -43,6 +46,8 @@ class Application(ApplicationBase):
     id: UUID
     cv_file_path: Optional[str] = None
     cv_original_filename: Optional[str] = None
+    cover_letter_path: Optional[str] = None
+    cover_letter_original_filename: Optional[str] = None
     status: ApplicationStatus
     duplicate_flag: bool
     duplicate_reason: Optional[str] = None
@@ -61,6 +66,13 @@ class Application(ApplicationBase):
 
 class ApplicationDetail(Application):
     # Timeline is heavy and handled in detail view
+    timeline: List[ApplicationTimeline] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class InternApplicationDetail(Application):
+    job_post: Optional[JobPost] = None
     timeline: List[ApplicationTimeline] = []
 
     model_config = ConfigDict(from_attributes=True)

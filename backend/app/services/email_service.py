@@ -1,12 +1,11 @@
-"""
-Email Service
-Handles sending emails via Mailgun
-"""
-import httpx
+import aiosmtplib
+from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import Optional, Dict, Any, List
 from jinja2 import Template
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from app.config import get_settings
 from app.models.email_template import EmailTemplate, TemplateType
 from app.models.application import Application
@@ -17,34 +16,40 @@ settings = get_settings()
 
 class EmailService:
     def __init__(self):
-        self.api_key = settings.mailgun_api_key
-        self.domain = settings.mailgun_domain
-        self.base_url = f"https://api.mailgun.net/v3/{self.domain}"
-        self.from_email = settings.mailgun_from_email
+        self.smtp_host = settings.smtp_host
+        self.smtp_port = settings.smtp_port
+        self.smtp_user = settings.smtp_user
+        self.smtp_password = settings.smtp_password
+        self.from_email = settings.from_email
 
     async def send_email(self, to_email: str, subject: str, html_body: str) -> bool:
-        """Send email using Mailgun API"""
-        if not self.api_key or not self.domain:
-            print("WARNING: Mailgun configuration missing. Email not sent.")
+        """Send email using asynchronous SMTP"""
+        if not self.smtp_user or not self.smtp_password:
+            print("WARNING: SMTP configuration missing. Email not sent.")
             return False
             
-        async with httpx.AsyncClient() as client:
-            try:
-                response = await client.post(
-                    f"{self.base_url}/messages",
-                    auth=("api", self.api_key),
-                    data={
-                        "from": self.from_email,
-                        "to": to_email,
-                        "subject": subject,
-                        "html": html_body
-                    }
-                )
-                response.raise_for_status()
-                return True
-            except Exception as e:
-                print(f"Error sending email: {e}")
-                return False
+        # Create message
+        message = MIMEMultipart()
+        message["From"] = self.from_email
+        message["To"] = to_email
+        message["Subject"] = subject
+        message.attach(MIMEText(html_body, "html"))
+
+        try:
+            await aiosmtplib.send(
+                message,
+                hostname=self.smtp_host,
+                port=self.smtp_port,
+                username=self.smtp_user,
+                password=self.smtp_password,
+                start_tls=True if self.smtp_port == 587 else False,
+                use_tls=True if self.smtp_port == 465 else False,
+            )
+            print(f"INFO: Email successfully dispatched to {to_email} via SMTP")
+            return True
+        except Exception as e:
+            print(f"ERROR: SMTP dispatch failure: {e}")
+            return False
 
     async def send_template_email(
         self, 

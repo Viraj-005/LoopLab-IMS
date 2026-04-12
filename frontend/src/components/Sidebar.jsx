@@ -27,6 +27,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed, onLogout }) => {
         { name: 'Spam', path: '/applications/spam', icon: 'report_gmailerrorred' },
       ],
     },
+    { name: 'Intern Registry', icon: 'people', path: '/interns' },
     { name: 'Email Templates', icon: 'mail', path: '/templates' },
     // COFOUNDER EXTRA: Staff Management
     ...( ['COFOUNDER', 'ADMIN'].includes(user?.role) ? [
@@ -203,9 +204,14 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed, onLogout }) => {
         </button>
 
         {!isCollapsed && (
-          <p className="text-[9px] text-slate-400 dark:text-dark-muted font-bold tracking-[0.18em] opacity-40 uppercase px-3 pt-1">
-            System Status: Optimal
-          </p>
+          <div className="px-3 pt-2">
+            <div className="flex items-center gap-2 px-3 py-2 bg-success/10 border border-success/20 rounded-lg select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
+              <p className="text-[9px] font-black text-success uppercase tracking-widest leading-none translate-y-[1px]">
+                System: Optimal
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </aside>

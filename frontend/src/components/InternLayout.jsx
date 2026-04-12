@@ -62,7 +62,13 @@ const InternLayout = ({ children, user, onLogout }) => {
             
             <div className="w-10 h-10 rounded-full border-2 border-primary/20 bg-primary/10 flex items-center justify-center text-primary font-black uppercase overflow-hidden">
                 {user?.profile_picture_url ? (
-                    <img src={user.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
+                    <img 
+                        src={user.profile_picture_url} 
+                        alt="Profile" 
+                        loading="lazy"
+                        onLoad={(e) => e.target.style.opacity = 1}
+                        className="w-full h-full object-cover opacity-0 transition-opacity duration-500" 
+                    />
                 ) : (
                     (user?.first_name ? user.first_name[0] : 'U')
                 )}

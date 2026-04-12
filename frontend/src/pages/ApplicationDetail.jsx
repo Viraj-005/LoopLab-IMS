@@ -19,6 +19,7 @@ const ApplicationDetail = () => {
   const [signalBody, setSignalBody] = useState('');
   const [sendingSignal, setSendingSignal] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [previewDocType, setPreviewDocType] = useState('cv'); // 'cv' or 'cover_letter'
 
   const fetchApp = async () => {
     try {
@@ -68,69 +69,72 @@ const ApplicationDetail = () => {
 
   const [downloading, setDownloading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [clPreviewUrl, setClPreviewUrl] = useState(null);
 
   useEffect(() => {
-    const fetchPreview = async () => {
-      if (app?.id) {
+    const fetchPreviews = async () => {
+      if (!app?.id) return;
+      
+      // Fetch CV Preview independently
+      try {
+        const cvRes = await api.get(`/applications/${app.id}/cv`, { responseType: 'blob' });
+        const cvFile = new Blob([cvRes.data], { type: 'application/pdf' });
+        setPreviewUrl(URL.createObjectURL(cvFile));
+      } catch (error) {
+        console.error("CV artifact stream failure:", error);
+      }
+
+      // Fetch CL Preview independently
+      if (app.cover_letter_path) {
         try {
-          const response = await api.get(`/applications/${app.id}/cv`, {
-            responseType: 'blob'
-          });
-          // Ensure the blob is treated as a PDF for the viewer
-          const file = new Blob([response.data], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-          setPreviewUrl(fileURL);
+          const clRes = await api.get(`/applications/${app.id}/cover-letter`, { responseType: 'blob' });
+          const clFile = new Blob([clRes.data], { type: 'application/pdf' });
+          setClPreviewUrl(URL.createObjectURL(clFile));
         } catch (error) {
-          console.error("Failed to fetch preview artifact:", error);
+          console.error("CL artifact stream failure:", error);
         }
       }
     };
-    fetchPreview();
+    fetchPreviews();
 
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (clPreviewUrl) URL.revokeObjectURL(clPreviewUrl);
     };
-  }, [app?.id]);
+  }, [app?.id, app?.cover_letter_path]);
 
-  const handleDownloadCV = async () => {
+  const handleDownloadDoc = async (type) => {
     if (downloading) return;
     setDownloading(true);
+    const endpoint = type === 'cv' ? 'cv' : 'cover-letter';
+    const filename = type === 'cv' ? (app.cv_original_filename || 'cv.pdf') : (app.cover_letter_original_filename || 'cover_letter.pdf');
+    
     try {
-      const response = await api.get(`/applications/${app.id}/cv`, {
+      const response = await api.get(`/applications/${app.id}/${endpoint}`, {
         responseType: 'blob'
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', app.cv_original_filename || 'cv.pdf');
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
     } catch (error) {
-      console.error("Failed to download CV:", error);
+      console.error(`Failed to download ${type}:`, error);
       showNotification("Failed to extract document artifact.", "error");
     } finally {
       setDownloading(false);
     }
   };
 
-  const handlePreviewCV = async () => {
-    if (previewUrl) {
-      window.open(previewUrl);
+  const handlePreviewDoc = (type) => {
+    const docType = type || previewDocType;
+    const url = docType === 'cv' ? previewUrl : clPreviewUrl;
+    if (url) {
+      window.open(url);
     } else {
-      try {
-        const response = await api.get(`/applications/${app.id}/cv`, {
-          responseType: 'blob'
-        });
-        const file = new Blob([response.data], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(file);
-        window.open(fileURL);
-      } catch (error) {
-        console.error("Failed to preview CV:", error);
-        showNotification("Failed to initialize document preview.", "error");
-      }
+      showNotification("Document preview stream not initialized.", "error");
     }
   };
 
@@ -225,13 +229,27 @@ const ApplicationDetail = () => {
         <div className="lg:col-span-7 space-y-6">
           <div className="glass-card rounded-[2.5rem] border-white shadow-2xl shadow-primary/5 overflow-hidden flex flex-col h-[850px]">
             <div className="px-10 py-8 border-b border-slate-200/30 flex justify-between items-center bg-white/20">
-              <div className="flex items-center gap-4">
-                 <span className="material-symbols-outlined text-primary">description</span>
-                 <h3 className="font-black text-on-surface font-headline">Submission Artifact</h3>
+              <div className="flex items-center gap-6">
+                 <button 
+                  onClick={() => setPreviewDocType('cv')}
+                  className={`flex items-center gap-3 pb-2 border-b-2 transition-all ${previewDocType === 'cv' ? 'border-primary text-primary opacity-100' : 'border-transparent text-slate-400 opacity-60 hover:opacity-100'}`}
+                 >
+                   <span className="material-symbols-outlined text-sm">description</span>
+                   <span className="text-[10px] font-black uppercase tracking-widest">CV Artifact</span>
+                 </button>
+                 {app.cover_letter_path && (
+                   <button 
+                    onClick={() => setPreviewDocType('cover_letter')}
+                    className={`flex items-center gap-3 pb-2 border-b-2 transition-all ${previewDocType === 'cover_letter' ? 'border-primary text-primary opacity-100' : 'border-transparent text-slate-400 opacity-60 hover:opacity-100'}`}
+                   >
+                     <span className="material-symbols-outlined text-sm">history_edu</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest">Cover Letter</span>
+                   </button>
+                 )}
               </div>
               <div className="flex items-center gap-3">
                 <button 
-                  onClick={handleDownloadCV}
+                  onClick={() => handleDownloadDoc(previewDocType)}
                   disabled={downloading}
                   className="flex items-center gap-3 px-6 py-2.5 glass-card bg-white rounded-xl text-[10px] font-black uppercase tracking-widest text-on-surface-variant hover:text-primary transition-all disabled:opacity-50"
                 >
@@ -241,18 +259,18 @@ const ApplicationDetail = () => {
               </div>
             </div>
              <div className="flex-1 bg-slate-100/50 flex flex-col p-8 overflow-hidden relative group">
-                {previewUrl ? (
+                 {(previewDocType === 'cv' ? previewUrl : clPreviewUrl) ? (
                   <>
                     <iframe 
-                      key={app.id}
-                      src={`${previewUrl}#toolbar=0`} 
+                      key={`${app.id}-${previewDocType}`}
+                      src={`${previewDocType === 'cv' ? previewUrl : clPreviewUrl}#toolbar=0`} 
                       className="w-full h-full rounded-2xl border border-slate-200 shadow-2xl bg-white"
-                      title="CV Preview"
+                      title="Document Preview"
                     ></iframe>
                     {/* Centered Overlay Button */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-all">
+                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-all">
                        <button 
-                         onClick={handlePreviewCV}
+                         onClick={() => handlePreviewDoc(previewDocType)}
                          className="pointer-events-auto px-10 py-5 bg-white/95 backdrop-blur-lg border border-slate-200 rounded-[2rem] flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:scale-105 active:scale-95 transition-all"
                        >
                          <span className="material-symbols-outlined text-black font-black text-2xl">open_in_new</span>
@@ -299,6 +317,72 @@ const ApplicationDetail = () => {
                     <p className="text-sm font-black text-on-surface truncate group-hover:text-primary transition-colors">{item.value}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* System Artifacts Section - Explicit Access */}
+            <div className="pt-10 border-t border-slate-100">
+              <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-6">Protocol Artifacts</h3>
+              <div className="space-y-4">
+                {/* CV Artifact Row */}
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 flex items-center justify-between group/art">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm group-hover/art:scale-110 tonal-transition">
+                      <span className="material-symbols-outlined text-sm">description</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-on-surface uppercase tracking-wider mb-0.5">Resume / CV</p>
+                      <p className="text-[9px] font-medium text-on-surface-variant opacity-60">Core applicant artifact</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => handlePreviewDoc('cv')}
+                      className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all shadow-sm"
+                      title="Quick Preview"
+                    >
+                      <span className="material-symbols-outlined text-sm">visibility</span>
+                    </button>
+                    <button 
+                      onClick={() => handleDownloadDoc('cv')}
+                      className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all shadow-sm"
+                      title="Download"
+                    >
+                      <span className="material-symbols-outlined text-sm">download</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cover Letter Artifact Row */}
+                {app.cover_letter_path && (
+                  <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between group/art">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg group-hover/art:scale-110 tonal-transition">
+                        <span className="material-symbols-outlined text-sm">history_edu</span>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-primary uppercase tracking-wider mb-0.5">Cover Letter</p>
+                        <p className="text-[9px] font-medium text-primary/60">Secondary strategy artifact</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handlePreviewDoc('cover_letter')}
+                        className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all shadow-sm"
+                        title="Quick Preview"
+                      >
+                        <span className="material-symbols-outlined text-sm">visibility</span>
+                      </button>
+                      <button 
+                        onClick={() => handleDownloadDoc('cover_letter')}
+                        className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all shadow-sm"
+                        title="Download"
+                      >
+                        <span className="material-symbols-outlined text-sm">download</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

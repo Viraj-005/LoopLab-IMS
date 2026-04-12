@@ -64,7 +64,13 @@ const InternBrowseJobs = () => {
                     return mUrl.endsWith('.mp4') || mUrl.endsWith('.webm') ? (
                       <video src={mUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" autoPlay muted loop />
                     ) : (
-                      <img src={mUrl} alt={job.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                      <img 
+                        src={mUrl} 
+                        alt={job.title} 
+                        loading="lazy"
+                        onLoad={(e) => e.target.style.opacity = 1}
+                        className="w-full h-full object-cover opacity-0 transition-all duration-1000 group-hover:scale-110" 
+                      />
                     );
                   })()
                 ) : (

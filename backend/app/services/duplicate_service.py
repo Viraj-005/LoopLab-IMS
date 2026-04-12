@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_
 from app.models.application import Application
 from app.schemas.application import ApplicationCreate
+from app.services.settings_service import get_system_settings
 
 async def check_duplicates(db: AsyncSession, app_data: ApplicationCreate) -> tuple[bool, str]:
     """
@@ -14,6 +15,11 @@ async def check_duplicates(db: AsyncSession, app_data: ApplicationCreate) -> tup
     """
     reason_parts = []
     is_duplicate = False
+    
+    # Check if duplicate detection is enabled
+    settings = await get_system_settings(db)
+    if not settings.enable_duplicate_detection:
+        return False, ""
     
     # 1. Check Email
     query_email = select(Application).where(Application.email == app_data.email)

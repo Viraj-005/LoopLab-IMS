@@ -1,22 +1,20 @@
-"""
-Intern Portal Routes
-Handles profile updates and job applications for logged-in interns
-"""
-import uuid
 import os
 import shutil
+import uuid
 from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models.intern import Intern
 from app.models.job_post import JobPost
 from app.models.application import Application, ApplicationStatus, ApplicationSource
 from app.schemas.intern import Intern as InternSchema, InternProfileUpdate
-from app.schemas.application import Application as ApplicationSchema, ApplicationCreate
+from app.schemas.application import Application as ApplicationSchema, ApplicationCreate, InternApplicationDetail
 from app.services.auth_service import get_current_intern
 from app.services.application_service import create_application
 from app.config import get_settings
@@ -46,7 +44,7 @@ async def update_profile(
     for key, value in update_dict.items():
         setattr(current_intern, key, value)
     
-    if current_intern.phone and current_intern.university:
+    if current_intern.phone and current_intern.education_history:
         current_intern.profile_complete = True
         
     await db.commit()
@@ -66,6 +64,78 @@ async def get_my_applications(
         .order_by(Application.received_at.desc())
     )
     return result.scalars().all()
+
+
+@router.get("/applications/{app_id}", response_model=InternApplicationDetail)
+async def get_application_detail(
+    app_id: uuid.UUID,
+    current_intern: Intern = Depends(get_current_intern),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get detailed view of a specific application for the intern"""
+    result = await db.execute(
+        select(Application)
+        .where(
+            Application.id == app_id,
+            Application.intern_id == current_intern.id
+        )
+        .options(
+            selectinload(Application.job_post),
+            selectinload(Application.timeline)
+        )
+    )
+    app = result.scalar_one_or_none()
+    if not app:
+        raise HTTPException(status_code=404, detail="Application record not found in your stream.")
+    return app
+
+
+@router.get("/applications/{app_id}/cv")
+async def download_my_cv(
+    app_id: uuid.UUID,
+    current_intern: Intern = Depends(get_current_intern),
+    db: AsyncSession = Depends(get_db)
+):
+    """Stream submitted CV artifact for the specified application"""
+    result = await db.execute(
+        select(Application).where(
+            Application.id == app_id,
+            Application.intern_id == current_intern.id
+        )
+    )
+    app = result.scalar_one_or_none()
+    if not app or not app.cv_file_path:
+        raise HTTPException(status_code=404, detail="CV artifact not found.")
+    
+    return FileResponse(
+        app.cv_file_path,
+        media_type='application/pdf',
+        content_disposition_type='inline'
+    )
+
+
+@router.get("/applications/{app_id}/cover-letter")
+async def download_my_cover_letter(
+    app_id: uuid.UUID,
+    current_intern: Intern = Depends(get_current_intern),
+    db: AsyncSession = Depends(get_db)
+):
+    """Stream submitted Cover Letter artifact for the specified application"""
+    result = await db.execute(
+        select(Application).where(
+            Application.id == app_id,
+            Application.intern_id == current_intern.id
+        )
+    )
+    app = result.scalar_one_or_none()
+    if not app or not app.cover_letter_path:
+        raise HTTPException(status_code=404, detail="Cover letter artifact not found.")
+    
+    return FileResponse(
+        app.cover_letter_path,
+        media_type='application/pdf',
+        content_disposition_type='inline'
+    )
 
 
 @router.post("/apply/{job_id}", response_model=ApplicationSchema)

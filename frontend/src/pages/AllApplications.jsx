@@ -11,6 +11,7 @@ const AllApplications = ({ type = 'all' }) => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [roles, setRoles] = useState([]);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState([]);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
@@ -53,9 +54,22 @@ const AllApplications = ({ type = 'all' }) => {
     }
   };
 
+  const fetchRoles = async () => {
+    try {
+      const res = await api.get('/applications/roles');
+      setRoles(res.data);
+    } catch (err) {
+      console.error("Error fetching roles:", err);
+    }
+  };
+
   useEffect(() => {
     fetchApps();
   }, [page, statusFilter, roleFilter, type]);
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -142,9 +156,9 @@ const AllApplications = ({ type = 'all' }) => {
               onChange={(e) => setRoleFilter(e.target.value)}
             >
               <option value="">Stream Logic</option>
-              <option value="Frontend">Frontend Sys</option>
-              <option value="Backend">Backend Sys</option>
-              <option value="UI/UX">Design Lab</option>
+              {roles.map(role => (
+                <option key={role} value={role}>{role}</option>
+              ))}
             </select>
           </div>
         </div>

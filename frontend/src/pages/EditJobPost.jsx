@@ -295,7 +295,13 @@ const EditJobPost = () => {
                    {existingMedia.endsWith('.mp4') || existingMedia.endsWith('.webm') ? (
                      <video src={getMediaUrl(existingMedia)} className="w-full h-full object-cover" muted />
                    ) : (
-                     <img src={getMediaUrl(existingMedia)} className="w-full h-full object-cover" alt="Existing" />
+                     <img 
+                       src={getMediaUrl(existingMedia)} 
+                       loading="lazy"
+                       onLoad={(e) => e.target.style.opacity = 1}
+                       className="w-full h-full object-cover opacity-0 transition-opacity duration-500" 
+                       alt="Existing" 
+                     />
                    )}
                 </div>
               </div>

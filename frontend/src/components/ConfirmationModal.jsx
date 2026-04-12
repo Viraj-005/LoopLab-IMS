@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, X } from 'lucide-react';
 
 const ConfirmationModal = ({ 
@@ -28,9 +29,13 @@ const ConfirmationModal = ({
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+    return createPortal(
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 overflow-hidden">
+            {/* Global Backdrop */}
+            <div 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity animate-in fade-in duration-300" 
+              onClick={onClose}
+            ></div>
             
             <div className="relative bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-200 overflow-hidden">
                 <div className="p-10 space-y-6">
@@ -84,7 +89,8 @@ const ConfirmationModal = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root')
     );
 };
 

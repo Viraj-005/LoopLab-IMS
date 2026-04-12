@@ -4,7 +4,7 @@ Intern Model - Applicant users who log in via Google OAuth
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy import String, Boolean, DateTime, Text, Enum as SQLEnum, Numeric
+from sqlalchemy import String, Boolean, DateTime, Text, Enum as SQLEnum, Numeric, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
@@ -44,6 +44,10 @@ class Intern(Base):
     graduation_year: Mapped[int] = mapped_column(nullable=True)
     gpa: Mapped[Decimal] = mapped_column(Numeric(3, 2), nullable=True)
     bio: Mapped[str] = mapped_column(Text, nullable=True)
+
+    # Advanced Profile (JSON Lists)
+    education_history: Mapped[list] = mapped_column(JSON, default=list, server_default='[]')
+    work_experience: Mapped[list] = mapped_column(JSON, default=list, server_default='[]')
 
     # Social links
     linkedin_url: Mapped[str] = mapped_column(String(500), nullable=True)

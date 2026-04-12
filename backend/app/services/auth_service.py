@@ -34,6 +34,14 @@ async def get_staff_by_email(db: AsyncSession, email: str) -> Optional[User]:
     return result.scalar_one_or_none()
 
 
+async def get_staff_by_id(db: AsyncSession, user_id: Union[str, uuid.UUID]) -> Optional[User]:
+    """Fetch staff user by ID"""
+    if isinstance(user_id, str):
+        user_id = uuid.UUID(user_id)
+    result = await db.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
+
+
 async def authenticate_staff(db: AsyncSession, login_data: UserLogin) -> Optional[User]:
     """Authenticate staff user with email and password with lockout logic"""
     user = await get_staff_by_email(db, login_data.email)

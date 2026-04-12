@@ -9,6 +9,9 @@ const Login = ({ setUser }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [twoFACode, setTwoFACode] = useState('');
+  const [tempToken, setTempToken] = useState('');
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -27,6 +30,13 @@ const Login = ({ setUser }) => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
+      if (response.data.requires_2fa) {
+        setRequires2FA(true);
+        setTempToken(response.data.temp_token);
+        setLoading(false);
+        return;
+      }
+
       const { access_token, refresh_token, user } = response.data;
       localStorage.setItem('token', access_token);
       localStorage.setItem('refresh_token', refresh_token);
@@ -36,6 +46,31 @@ const Login = ({ setUser }) => {
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.detail || 'Invalid credentials. Access to the management system has been denied.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify2FA = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await api.post('/auth/2fa/verify-login', {
+        code: twoFACode,
+        temp_token: tempToken
+      });
+
+      const { access_token, refresh_token, user } = response.data;
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('refresh_token', refresh_token);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('user_type', 'staff');
+      setUser(user);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Invalid security code. Access denied.');
     } finally {
       setLoading(false);
     }
@@ -140,7 +175,56 @@ const Login = ({ setUser }) => {
           )}
 
           {activeTab === 'staff' ? (
-            <form onSubmit={handleStaffLogin} className="space-y-5">
+            requires2FA ? (
+               <form onSubmit={handleVerify2FA} className="space-y-8 animate-in zoom-in-95 duration-500">
+                  <div className="space-y-4 text-center">
+                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-4">
+                       <span className="material-symbols-outlined text-3xl">shield_lock</span>
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 font-headline">Two-Factor Required</h3>
+                    <p className="text-xs font-medium text-slate-500">Identify verified. Enter the 6-digit security code from your authenticator app.</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      maxLength="6"
+                      required
+                      autoFocus
+                      value={twoFACode}
+                      onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, ''))}
+                      className="w-full h-[64px] bg-slate-50 border-2 border-slate-100 rounded-2xl text-center text-3xl font-black tracking-[0.5em] text-slate-900 focus:outline-none focus:border-primary/50 focus:bg-white transition-all placeholder-slate-200"
+                      placeholder="000000"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <button
+                      type="submit"
+                      disabled={loading || twoFACode.length < 6}
+                      className="w-full h-[60px] bg-slate-900 text-white font-black rounded-2xl shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3 text-[11px] uppercase tracking-widest disabled:opacity-50"
+                    >
+                      {loading ? (
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                      ) : (
+                        <>
+                          <span>Verify & Unlock</span>
+                          <span className="material-symbols-outlined text-sm">verified_user</span>
+                        </>
+                      )}
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setRequires2FA(false)}
+                      className="w-full py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
+                    >
+                      Back to Login
+                    </button>
+                  </div>
+               </form>
+            ) : (
+              <form onSubmit={handleStaffLogin} className="space-y-5">
+                {/* ... existing fields ... */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
                 <div className="relative group">
@@ -159,7 +243,13 @@ const Login = ({ setUser }) => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password</label>
-                  <button type="button" className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Forgot?</button>
+                  <button 
+                    type="button" 
+                    onClick={() => navigate('/forgot-password')}
+                    className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
+                  >
+                    Forgot?
+                  </button>
                 </div>
                 <div className="relative group">
                   <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-xl">lock</span>
@@ -198,7 +288,7 @@ const Login = ({ setUser }) => {
                 )}
               </button>
             </form>
-          ) : (
+          )) : (
             <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
                <div className="p-6 bg-blue-50/50 rounded-3xl border border-blue-100/50 flex flex-col items-center text-center space-y-3">
                   <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600">

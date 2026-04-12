@@ -26,10 +26,12 @@ class Settings(BaseSettings):
     max_login_attempts: int = 5
     lockout_minutes: int = 15
 
-    # Mailgun
-    mailgun_api_key: str = ""
-    mailgun_domain: str = ""
-    mailgun_from_email: str = "noreply@looplab.io"
+    # SMTP Configuration (Replacing Mailgun)
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    from_email: str = "looplab888@gmail.com"
 
     # Company Branding
     company_name: str = "LOOPLAB"

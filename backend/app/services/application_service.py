@@ -13,6 +13,11 @@ from app.services.duplicate_service import check_duplicates
 from app.services.spam_service import check_spam
 from app.services.timeline_service import add_timeline_entry
 from app.models.timeline import ActionType, PerformerType
+from app.services.staff_notification_service import (
+    notify_staff_new_application, 
+    notify_staff_flag_triggered,
+    notify_staff_status_change
+)
 
 async def create_application(db: AsyncSession, app_in: ApplicationCreate) -> Application:
     """
@@ -58,6 +63,13 @@ async def create_application(db: AsyncSession, app_in: ApplicationCreate) -> App
     await db.commit()
     await db.refresh(application)
     
+    # Staff Notifications
+    await notify_staff_new_application(db, application)
+    if application.spam_flag:
+        await notify_staff_flag_triggered(db, application, "SPAM", application.spam_reason)
+    elif application.duplicate_flag:
+        await notify_staff_flag_triggered(db, application, "DUPLICATE", application.duplicate_reason)
+    
     # Timeline entry for creation
     await add_timeline_entry(
         db, application.id, ActionType.APPLICATION_RECEIVED, 
@@ -86,7 +98,8 @@ async def get_applications(
     search: Optional[str] = None,
     source: Optional[ApplicationSource] = None,
     is_duplicate: Optional[bool] = None,
-    is_spam: Optional[bool] = None
+    is_spam: Optional[bool] = None,
+    role: Optional[str] = None
 ) -> Tuple[List[Application], int]:
     """Get list of applications with filtering"""
     query = select(Application)
@@ -102,6 +115,9 @@ async def get_applications(
         
     if is_spam is not None:
         query = query.where(Application.spam_flag == is_spam)
+        
+    if role:
+        query = query.where(Application.applied_role == role)
         
     if search:
         search_term = f"%{search}%"
@@ -128,6 +144,14 @@ async def get_applications(
     return result.scalars().all(), total
 
 
+async def get_unique_roles(db: AsyncSession) -> List[str]:
+    """Get list of unique applied roles for filtering"""
+    query = select(Application.applied_role).distinct().where(Application.applied_role.is_not(None))
+    result = await db.execute(query)
+    roles = [r for r in result.scalars().all() if r]
+    return sorted(roles)
+
+
 async def update_application(
     db: AsyncSession, 
     application_id: uuid.UUID, 
@@ -151,6 +175,8 @@ async def update_application(
             performed_by=user_email,
             performer_type=PerformerType.ADMIN
         )
+        # Notify staff about status change
+        await notify_staff_status_change(db, application, old_status, new_status, user_email)
         
     # Track manual flag changes
     if "duplicate_flag" in update_data:
@@ -166,7 +192,7 @@ async def update_application(
                 db, application_id, ActionType.SPAM_CLEARED,
                 "Marked as not spam", performed_by=user_email, performer_type=PerformerType.ADMIN
             )
-            
+
     # Apply updates
     for key, value in update_data.items():
         setattr(application, key, value)
