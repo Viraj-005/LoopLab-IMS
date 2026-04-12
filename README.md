@@ -71,7 +71,7 @@ ims-protocol/
 │   │   ├── services/       # Business Logic & Infrastructure
 │   │   └── schemas/        # Data Integrity Protocols (Pydantic)
 │   ├── uploads/            # Encrypted Artifact Storage
-│   └── scratch/            # Protocol Verification Scripts
+│   └── scripts/            # Database Migrations & Utility Protocols
 ├── frontend/               # User Interface Layer (React/Vite)
 │   ├── src/
 │   │   ├── pages/          # Full-Page Institutional Views
