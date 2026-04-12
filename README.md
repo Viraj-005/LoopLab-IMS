@@ -1,4 +1,8 @@
+<div align="center">
+
 # [IMS] Intern Management System · Protocol v2.0
+
+![IMS Hero Banner](C:/Users/DELL/.gemini/antigravity/brain/faf2e830-2dc0-4816-ab39-0c8eb1fe4b2b/ims_hero_banner_1775953123760.png)
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Modern-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -8,6 +12,10 @@
 **Institutional Recruitment & Strategic Stream Management.**
 A high-fidelity, dual-portal ecosystem designed to automate and elevate the internship application lifecycle. Built for **LOOPLAB** recruitment streams.
 
+[🚀 Discovery Portal](#-discovery-portal) • [🏛 Command Center](#-command-center) • [🛠 Setup Protocol](#-setup-protocol)
+
+</div>
+
 ---
 
 ## 🏛 System Architecture
@@ -16,70 +24,79 @@ The IMS operates on a synchronized protocol between the **Organizational Command
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant I as Intern Portal
-    participant B as Backend (FastAPI)
+    participant B as Backend API
     participant S as Staff Dashboard
-    participant D as DB (PostgreSQL)
+    participant D as PostgreSQL
 
-    I->>B: GET /job-posts/ (Discovery)
-    B-->>I: Return Linked Strategic Streams
-    S->>B: POST /job-posts/ (Initialize Protocol)
-    B->>D: Store Job Metadata & Tags
+    Note over I,D: Protocol Initialization
+    S->>B: POST /job-posts/ (Initialize Stream)
+    B-->>D: Commit Metadata & Semantic Tags
+    I->>B: GET /job-posts/status=Live
+    B-->>I: Broadcast High-Fidelity Cards
+    
+    Note over I,S: Ingestion Pulse
     I->>B: POST /applications/ (Deploy CV)
-    B->>D: Register Protocol Instance
-    B-->>S: Real-time Signal (Notification)
+    B-->>D: Atomic Protocol Registration
+    B-->>S: Real-time Signal (Socket/Notif)
 ```
 
 ---
 
-## 🚀 Intentional Features
+## 🚀 Mission Critical Features
 
-### 1. Semantic Tagging Engine
-- **Color-Coded Badges**: Dynamic HSL generation ensures that categories like `AI Research` and `UX/UI Design` are visually distinct across the platform.
-*   **Strategic Categorization**: HR can define custom tags (e.g., `Urgent`, `High-Growth`) that appear as neon-pills in the discover stream.
-
-### 2. Immersive Discovery (Intern Portal)
-- **Media-First Headers**: High-fidelity video and image banner support for every opening.
-- **Strategic Occupancy**: Real-time monitoring of application capacity vs. available seats.
-- **Mission Briefings**: Comprehensive popup modals detailing technical requirements and mission descriptions.
-
-### 3. Application Ingestion (Staff Dashboard)
-- **Automated CV Parsing**: Direct ingestion of applications via Mailgun inbound webhooks.
-- **Operational Timeline**: Full audit logs for every applicant state change (New -> Selected/Rejected).
-- **Communication Hub**: Pre-defined institutional email templates with variable substitution.
+| 🛠 Core Engineering | 🎨 Discovery UI |
+| :--- | :--- |
+| **Semantic Tagging Engine**<br>Dynamic HSL generation ensures categories like `AI Research` and `UX/UI Design` are visually distinct with neon-pill branding. | **Media-First Recruitment**<br>Immersive 16:9 4K video and image banner support for every opening to maximize intern engagement. |
+| **Automated Ingestion**<br>Direct CV and metadata ingestion via Mailgun inbound webhooks with intelligent duplicate detection. | **Strategic Occupancy**<br>Real-time "Seats Left" monitoring to create a professional sense of urgency and transparency. |
 
 ---
 
-## 🛠 Strategic Deployment
+## 📂 File System Blueprint
 
-### Prerequisites
-- **Python 3.10+** (System Intelligence)
-- **Node.js 18+** (Frontend Layer)
-- **PostgreSQL** (Institutional Data Storage)
-
-### 1. Infrastructure Setup
-```bash
-# Clone the repository
-git clone https://github.com/looplab/ims-protocol.git
-cd ims-protocol
+```text
+ims-protocol/
+├── backend/                # Core Command Logic (FastAPI)
+│   ├── app/
+│   │   ├── models/         # Institutional Schema
+│   │   ├── routes/         # Operational Endpoints
+│   │   └── schemas/        # Data Integrity Protocols
+│   └── uploads/            # Encrypted Media Stream
+├── frontend/               # User Interface Layer (React/Vite)
+│   ├── src/
+│   │   ├── pages/          # Institutional Views
+│   │   ├── components/     # Reusable UI Modules
+│   │   └── services/       # API Communications
+└── README.md               # Strategic Documentation
 ```
 
-### 2. Backend Initialization
+---
+
+## 🛠 Operational Setup Protocol
+
+> [!IMPORTANT]
+> **Credential Registry**: Default Admin: `admin@looplab.io` / Password: `admin123`
+> **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+### Phase 1: Institutional Infrastructure
+Ensure your environment meets the global standards: **Python 3.10+**, **Node.js 18+**, and **PostgreSQL**.
+
+### Phase 2: Backend Deployment
 ```bash
 cd backend
 python -m venv .venv
-.venv\Scripts\activate # Windows
-# Install core dependencies
+# Windows Initialization:
+.venv\Scripts\activate
+# Install Core Modules:
 pip install -r requirements.txt
-# Sync protocol schema
+# Sync Meta-Schema:
 python add_tags_column.py
-# Seed internal credentials
-python seed_data.py
-# Execute server
+# Execute Local Server:
 uvicorn app.main:app --reload
 ```
 
-### 3. Frontend Deployment
+### Phase 3: Interface Initialization
 ```bash
 cd frontend
 npm install
@@ -89,14 +106,12 @@ npm run dev
 ---
 
 ## 🛡 Security & Governance
-- **JWT Authorization**: Encrypted session management for all administrative roles.
-- **Favicon Intelligence**: Dynamic icon switching based on active user role (Technical Cube for Staff, Paper Plane for Interns).
-- **Media Isolation**: Secure storage of candidate CVs outside the public web root.
+- **Protocol Isolation**: Candidate CVs and sensitive media are stored outside the public web root.
+- **Role-Aware Favicons**: Dynamic branding (Technical Cube for Staff, Paper Plane for Interns).
+- **JWT Authorization**: 256-bit encrypted session management for organizational roles.
 
 ---
 
-> [!IMPORTANT]
-> **Default Admin Access**: `admin@looplab.io` / `password: admin123`
-> **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
-
-Built with precision by **Antigravity** for **LOOPLAB**.
+<div align="center">
+Built with precision by <b>Antigravity</b> for <b>LOOPLAB</b>.
+</div>
