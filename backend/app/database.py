@@ -41,7 +41,4 @@ async def get_db():
             await session.close()
 
 
-async def init_db():
-    """Initialize database tables"""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+# init_db is removed in favor of Alembic migrations

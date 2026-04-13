@@ -22,7 +22,8 @@ from app.routes import (
     admin_interns,
     settings as system_settings
 )
-from app.database import init_db
+
+
 
 settings = get_settings()
 
@@ -67,9 +68,10 @@ app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads"
 
 @app.on_event("startup")
 async def on_startup():
-    # In development, we can auto-create tables
-    from app.database import init_db
-    await init_db()
+    # Tables handled by alembic migrations
+    # from app.database import init_db
+    # await init_db()
+    pass
 
 @app.get("/health")
 async def health():
