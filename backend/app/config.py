@@ -2,6 +2,7 @@
 IMS Backend - Configuration Module
 Loads settings from environment variables
 """
+from pydantic import Field
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
@@ -58,12 +59,18 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:5173/auth/callback/google"
 
+    env_database_url: str | None = Field(default=None, alias="database_url")
+
     @property
     def database_url(self) -> str:
+        if self.env_database_url:
+            return self.env_database_url
         return f"postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
     @property
     def sync_database_url(self) -> str:
+        if self.env_database_url:
+            return self.env_database_url.replace("+asyncpg", "")
         return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
     class Config:
