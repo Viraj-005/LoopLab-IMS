@@ -18,14 +18,14 @@ async def seed_data():
     """Seed the database with initial data"""
     async with AsyncSessionLocal() as db:
         # 1. Create Default Admin
-        admin_email = "admin@looplab.io"
+        admin_email = settings.admin_email
         result = await db.execute(select(User).where(User.email == admin_email))
         if not result.scalar_one_or_none():
             print(f"Creating default admin: {admin_email}")
             admin_user = User(
                 email=admin_email,
-                hashed_password=get_password_hash("admin123"),
-                full_name="HR Admin",
+                hashed_password=get_password_hash(settings.admin_password),
+                full_name="System Administrator",
                 role=UserRole.ADMIN,
                 is_active=True
             )

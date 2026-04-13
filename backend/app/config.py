@@ -21,10 +21,20 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 15       # Short-lived
     refresh_token_expire_days: int = 7          # Longer-lived refresh
+    
+    # Initial Admin Setup
+    admin_email: str = "virajinduruwa@looplab.lk"
+    admin_password: str = "Viraj@LoopLab#888"
 
     # Security / Lockout
     max_login_attempts: int = 5
     lockout_minutes: int = 15
+
+    # AWS S3 Settings
+    aws_access_key_id: str = ""
+    aws_secret_access_key: str = ""
+    aws_region: str = "us-east-1"
+    s3_bucket_name: str = ""
 
     # SMTP Configuration (Replacing Mailgun)
     smtp_host: str = "smtp.gmail.com"

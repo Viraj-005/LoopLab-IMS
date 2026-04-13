@@ -14,6 +14,7 @@ from app.models.user import User
 from app.schemas.job_post import JobPostCreate, JobPostUpdate, JobPost as JobPostSchema, JobPostList
 from app.services.auth_service import get_current_staff, get_any_active_user
 from app.config import get_settings
+from app.utils.file_utils import save_upload_file, get_media_presigned_url
 
 settings = get_settings()
 router = APIRouter(prefix="/job-posts", tags=["Job Posts"])
@@ -40,26 +41,23 @@ async def upload_job_media(
     if not job:
         raise HTTPException(status_code=404, detail="Job post not found")
     
-    # Ensure upload directory exists
-    os.makedirs(settings.upload_dir, exist_ok=True)
-    
     # Create unique filename
     ext = os.path.splitext(file.filename)[1]
     filename = f"job_{job_id}_{uuid.uuid4().hex}{ext}"
-    file_path = os.path.join(settings.upload_dir, filename)
     
-    # Save file
+    # Save file using utility (Local or S3 - now always private for consistency with bucket policy)
     try:
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        media_url, _ = await save_upload_file(file, custom_filename=filename, is_private=True)
     finally:
         await file.close()
         
-    # Update job post with media URL
-    job.media_url = f"/uploads/{filename}"
+    # Update job post with media URL (will be transformed to presigned URL on retrieval)
+    job.media_url = media_url
     await db.commit()
     await db.refresh(job)
     
+    # Return job with a fresh presigned URL for the response
+    job.media_url = get_media_presigned_url(job.media_url)
     return job
 
 
@@ -131,6 +129,8 @@ async def list_job_posts(
     for job, count in rows:
         job.application_count = count
         job.applied = job.id in applied_ids
+        # Transform S3 URL to Presigned URL
+        job.media_url = get_media_presigned_url(job.media_url)
         items.append(job)
     
     # Total count for pagination
@@ -175,6 +175,9 @@ async def get_job_post(
         )
         app_res = await db.execute(app_query)
         job.applied = app_res.scalar_one_or_none() is not None
+    
+    # Transform S3 URL to Presigned URL
+    job.media_url = get_media_presigned_url(job.media_url)
     
     return job
 

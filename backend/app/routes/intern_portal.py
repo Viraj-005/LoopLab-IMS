@@ -17,6 +17,8 @@ from app.schemas.intern import Intern as InternSchema, InternProfileUpdate
 from app.schemas.application import Application as ApplicationSchema, ApplicationCreate, InternApplicationDetail
 from app.services.auth_service import get_current_intern
 from app.services.application_service import create_application
+from app.services.s3_service import s3_service
+from app.utils.file_utils import save_upload_file
 from app.config import get_settings
 
 router = APIRouter(prefix="/intern", tags=["Intern Portal"])
@@ -107,6 +109,16 @@ async def download_my_cv(
     if not app or not app.cv_file_path:
         raise HTTPException(status_code=404, detail="CV artifact not found.")
     
+    # Check if this is an S3 URL or a local path
+    if app.cv_file_path.startswith('http'):
+        # Extract object name from URL
+        # URL format: https://bucket.s3.region.amazonaws.com/object_name
+        object_name = app.cv_file_path.split('/')[-1]
+        presigned_url = s3_service.get_presigned_url(object_name)
+        if presigned_url:
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(presigned_url)
+    
     return FileResponse(
         app.cv_file_path,
         media_type='application/pdf',
@@ -131,6 +143,14 @@ async def download_my_cover_letter(
     if not app or not app.cover_letter_path:
         raise HTTPException(status_code=404, detail="Cover letter artifact not found.")
     
+    # Check if this is an S3 URL or a local path
+    if app.cover_letter_path.startswith('http'):
+        object_name = app.cover_letter_path.split('/')[-1]
+        presigned_url = s3_service.get_presigned_url(object_name)
+        if presigned_url:
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(presigned_url)
+
     return FileResponse(
         app.cover_letter_path,
         media_type='application/pdf',
@@ -166,28 +186,22 @@ async def apply_for_job(
     if existing_res.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="You have already applied for this position")
 
-    # 3. Handle file uploads
-    # Ensure upload directory exists
-    job_upload_dir = os.path.join(settings.upload_dir, str(job_id))
-    os.makedirs(job_upload_dir, exist_ok=True)
-
-    # Save resume
+    # 3. Handle file uploads using utility (S3 or Local)
+    # Reusing current_intern.id for filename to keep it consistent
     resume_ext = os.path.splitext(resume.filename)[1]
     resume_filename = f"resume_{current_intern.id}{resume_ext}"
-    resume_path = os.path.join(job_upload_dir, resume_filename)
-    with open(resume_path, "wb") as buffer:
-        shutil.copyfileobj(resume.file, buffer)
+    
+    # Save resume (Private)
+    resume_path, _ = await save_upload_file(resume, custom_filename=resume_filename, is_private=True)
 
-    # Save cover letter if provided
+    # Save cover letter if provided (Private)
     cl_path = None
     cl_original_name = None
     if cover_letter:
         cl_ext = os.path.splitext(cover_letter.filename)[1]
         cl_filename = f"cover_letter_{current_intern.id}{cl_ext}"
-        cl_path = os.path.join(job_upload_dir, cl_filename)
         cl_original_name = cover_letter.filename
-        with open(cl_path, "wb") as buffer:
-            shutil.copyfileobj(cover_letter.file, buffer)
+        cl_path, _ = await save_upload_file(cover_letter, custom_filename=cl_filename, is_private=True)
 
     # 4. Create application via service
     app_in = ApplicationCreate(

@@ -28,6 +28,7 @@ python-magic-bin
 # HTTP client & Communication
 httpx
 aiosmtplib
+boto3
 jinja2
 
 # Environment
