@@ -33,6 +33,13 @@ class EmailService:
         message["From"] = self.from_email
         message["To"] = to_email
         message["Subject"] = subject
+        
+        # Convert plain newlines to HTML breaks if no basic HTML tags are used
+        lower_body = html_body.lower()
+        if "<p" not in lower_body and "<br" not in lower_body and "<div" not in lower_body:
+            html_body = html_body.replace("\n", "<br>")
+            html_body = f'<div style="font-family: system-ui, -apple-system, sans-serif; color: #333; line-height: 1.6;">{html_body}</div>'
+            
         message.attach(MIMEText(html_body, "html"))
 
         try:

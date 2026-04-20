@@ -3,7 +3,7 @@ import shutil
 import uuid
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, BackgroundTasks
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -20,6 +20,8 @@ from app.services.application_service import create_application
 from app.services.s3_service import s3_service
 from app.utils.file_utils import save_upload_file
 from app.config import get_settings
+from app.services.email_service import email_service
+from app.models.email_template import TemplateType
 
 router = APIRouter(prefix="/intern", tags=["Intern Portal"])
 settings = get_settings()
@@ -161,6 +163,7 @@ async def download_my_cover_letter(
 @router.post("/apply/{job_id}", response_model=ApplicationSchema)
 async def apply_for_job(
     job_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
     resume: UploadFile = File(...),
     cover_letter: Optional[UploadFile] = File(None),
     full_name: str = Form(...),
@@ -225,5 +228,8 @@ async def apply_for_job(
     if not current_intern.phone:
         current_intern.phone = phone
         await db.commit()
+
+    # 6. Auto-reply for receipt
+    background_tasks.add_task(email_service.send_template_email, db, application, TemplateType.APPLICATION_RECEIVED)
 
     return application
