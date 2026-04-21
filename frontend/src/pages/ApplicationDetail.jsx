@@ -27,6 +27,18 @@ const ApplicationDetail = () => {
   const [interviewVenue, setInterviewVenue] = useState('');
   const [isScheduling, setIsScheduling] = useState(false);
 
+  // Helper to ensure naive UTC strings from backend are parsed as UTC
+  const formatLogTime = (dateStr) => {
+    if (!dateStr) return '';
+    const standardized = dateStr.includes('Z') || dateStr.includes('+') ? dateStr : `${dateStr}Z`;
+    return new Date(standardized).toLocaleString([], { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
   const fetchApp = async () => {
     try {
       const res = await api.get(`/applications/${id}`);
@@ -452,7 +464,7 @@ const ApplicationDetail = () => {
                      <p className="text-sm font-medium text-on-surface leading-relaxed">{n.description}</p>
                      <div className="mt-4 pt-4 border-t border-slate-50 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
                         <p className="text-[9px] font-black uppercase tracking-widest">{n.performed_by || 'SYSTEM'}</p>
-                        <p className="text-[9px] font-black uppercase tracking-widest">{new Date(n.created_at).toLocaleDateString()}</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest">{formatLogTime(n.created_at)}</p>
                      </div>
                    </div>
                  ))}

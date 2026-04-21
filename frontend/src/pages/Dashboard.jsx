@@ -23,6 +23,19 @@ const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showControls, setShowControls] = useState(false);
 
+  // Helper to ensure naive UTC strings from backend are parsed as UTC
+  const formatStreamTime = (dateStr, full = false) => {
+    if (!dateStr) return '';
+    // Append Z if no timezone indicator exists to force UTC parsing
+    const standardized = dateStr.includes('Z') || dateStr.includes('+') ? dateStr : `${dateStr}Z`;
+    const date = new Date(standardized);
+    
+    if (full) {
+      return date.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    }
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   const statsIntervals = [
     { label: 'Last 30 Days', value: 30 },
     { label: 'Last 90 Days', value: 90 },
@@ -286,7 +299,7 @@ const Dashboard = () => {
                       {item.description}
                     </p>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {formatStreamTime(item.created_at)}
                     </p>
                   </div>
                 </div>
@@ -332,7 +345,7 @@ const Dashboard = () => {
                      {item.description}
                    </p>
                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                     {new Date(item.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                     {formatStreamTime(item.created_at, true)}
                    </p>
                  </div>
              </div>
