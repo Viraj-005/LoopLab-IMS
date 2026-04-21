@@ -40,8 +40,8 @@ const Settings = () => {
   const [error, setError] = useState(null);
   
   const [orgName, setOrgName] = useState('LOOPLAB');
-  const [contactEmail, setContactEmail] = useState('hr@looplab.io');
-  const [website, setWebsite] = useState('https://looplab.io');
+  const [contactEmail, setContactEmail] = useState('looplab888@gmail.com');
+  const [website, setWebsite] = useState('https://looplab.lk');
   const [notifications, setNotifications] = useState({
     newApplications: true,
     duplicateDetection: true,
