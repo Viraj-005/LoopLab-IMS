@@ -62,7 +62,8 @@ class EmailService:
         self, 
         db: AsyncSession, 
         application: Application, 
-        template_type: TemplateType
+        template_type: TemplateType,
+        **extra_variables
     ) -> bool:
         """
         Find active template for the type and send it
@@ -85,7 +86,10 @@ class EmailService:
         variables = {
             "applicant_name": application.applicant_name or "Applicant",
             "applied_role": application.applied_role or "Internship",
-            "company_name": settings.company_name
+            "company_name": settings.company_name,
+            "interview_time": application.interview_time or "",
+            "interview_venue": application.interview_venue or "",
+            **extra_variables
         }
         subject, body = template.render(**variables)
         

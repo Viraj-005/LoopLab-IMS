@@ -40,6 +40,8 @@ class ApplicationUpdate(BaseModel):
     spam_flag: Optional[bool] = None
     applicant_name: Optional[str] = None
     applied_role: Optional[str] = None
+    interview_time: Optional[str] = None
+    interview_venue: Optional[str] = None
 
 
 class Application(ApplicationBase):
@@ -57,6 +59,8 @@ class Application(ApplicationBase):
     source: ApplicationSource
     job_id: Optional[UUID] = None
     intern_id: Optional[UUID] = None
+    interview_time: Optional[str] = None
+    interview_venue: Optional[str] = None
     received_at: datetime
     created_at: datetime
     updated_at: datetime

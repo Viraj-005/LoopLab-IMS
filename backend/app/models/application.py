@@ -146,6 +146,10 @@ class Application(Base):
     cover_letter_path: Mapped[str] = mapped_column(String(500), nullable=True)
     cover_letter_original_filename: Mapped[str] = mapped_column(String(255), nullable=True)
     
+    # Interview Scheduling
+    interview_time: Mapped[str] = mapped_column(String(255), nullable=True)
+    interview_venue: Mapped[str] = mapped_column(String(500), nullable=True)
+    
     # Timestamps
     received_at: Mapped[datetime] = mapped_column(
         DateTime,

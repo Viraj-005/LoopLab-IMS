@@ -20,6 +20,12 @@ const ApplicationDetail = () => {
   const [sendingSignal, setSendingSignal] = useState(false);
   const [success, setSuccess] = useState(false);
   const [previewDocType, setPreviewDocType] = useState('cv'); // 'cv' or 'cover_letter'
+  
+  // Interview Scheduling State
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [interviewTime, setInterviewTime] = useState('');
+  const [interviewVenue, setInterviewVenue] = useState('');
+  const [isScheduling, setIsScheduling] = useState(false);
 
   const fetchApp = async () => {
     try {
@@ -41,18 +47,41 @@ const ApplicationDetail = () => {
       setIsRejectModalOpen(true);
       return;
     }
+    if (status === 'Pending') {
+      setIsScheduleModalOpen(true);
+      return;
+    }
     await performStatusUpdate(status);
   };
 
-  const performStatusUpdate = async (status) => {
+  const performStatusUpdate = async (status, schedulingData = {}) => {
     try {
-      await api.patch(`/applications/${id}`, { status });
+      await api.patch(`/applications/${id}`, { 
+        status,
+        ...schedulingData
+      });
       setIsRejectModalOpen(false);
+      setIsScheduleModalOpen(false);
       fetchApp();
       showNotification(`Protocol status updated to ${status}.`, "success");
     } catch (err) {
       showNotification("Failed to update protocol status.", "error");
     }
+  };
+
+  const handleConfirmSchedule = async () => {
+    if (!interviewTime.trim() || !interviewVenue.trim()) {
+      showNotification("Interview time and venue are required for this protocol.", "error");
+      return;
+    }
+    setIsScheduling(true);
+    await performStatusUpdate('Pending', {
+      interview_time: interviewTime,
+      interview_venue: interviewVenue
+    });
+    setIsScheduling(false);
+    setInterviewTime('');
+    setInterviewVenue('');
   };
 
   const addNote = async () => {
@@ -533,6 +562,68 @@ const ApplicationDetail = () => {
         expectedName={app.applicant_name}
         itemName="Applicant Name"
       />
+
+      {/* Schedule Interview Modal */}
+      <Modal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        title="Schedule Interview Session"
+        subtitle={`Initialize the next stage for ${app.applicant_name}. This will trigger an official invitation signal.`}
+        maxWidth="max-w-xl"
+      >
+        <div className="space-y-8 p-4">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">Interview Date & Time</label>
+              <input 
+                type="text" 
+                value={interviewTime}
+                onChange={(e) => setInterviewTime(e.target.value)}
+                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
+                placeholder="e.g. Wednesday, Oct 25th at 10:30 AM"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">Location / Venue</label>
+              <input 
+                type="text" 
+                value={interviewVenue}
+                onChange={(e) => setInterviewVenue(e.target.value)}
+                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
+                placeholder="e.g. Google Meet Link or Boardroom 02"
+              />
+            </div>
+          </div>
+
+          <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+            <div className="flex gap-4 items-start">
+               <span className="material-symbols-outlined text-primary text-xl mt-1">info</span>
+               <div className="space-y-1">
+                 <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-relaxed">System Action Log</p>
+                 <p className="text-[11px] font-medium text-primary/70 leading-relaxed">
+                   Confirming these details will automatically dispatch an **Interview Invitation** email and an **Internal Signal** to the intern's dashboard.
+                 </p>
+               </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button 
+              onClick={() => setIsScheduleModalOpen(false)}
+              className="flex-1 py-4 glass-card border-slate-200 text-on-surface-variant font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+            >
+              Abort Selection
+            </button>
+            <button 
+              onClick={handleConfirmSchedule}
+              disabled={isScheduling || !interviewTime.trim() || !interviewVenue.trim()}
+              className="flex-1 py-4 hero-gradient text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isScheduling ? 'Initializing...' : 'Confirm & Signal'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

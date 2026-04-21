@@ -100,7 +100,35 @@ async def update_application_status(
 
     # Auto-send emails based on status change
     if app_update.status:
-        if app_update.status == ApplicationStatus.SELECTED:
+        if app_update.status == ApplicationStatus.PENDING:
+            # Trigger Interview Invitation with details
+            background_tasks.add_task(
+                email_service.send_template_email, 
+                db, app, TemplateType.INTERVIEW_INVITATION,
+                interview_time=app.interview_time,
+                interview_venue=app.interview_venue
+            )
+            
+            # Create Internal Signal (Notification) for Portal Applications
+            if app.source == ApplicationSource.PORTAL and app.intern_id:
+                notification_body = f"You have been invited for an interview regarding your application for {app.applied_role or 'this internship'}.\n\n"
+                if app.interview_time:
+                    notification_body += f"Time: {app.interview_time}\n"
+                if app.interview_venue:
+                    notification_body += f"Venue: {app.interview_venue}\n"
+                
+                notification_body += "\nPlease check your email for the official invitation letter."
+                
+                new_notif = Notification(
+                    intern_id=app.intern_id,
+                    application_id=app.id,
+                    subject="New Interview Invitation Scheduled",
+                    body=notification_body
+                )
+                db.add(new_notif)
+                await db.commit()
+
+        elif app_update.status == ApplicationStatus.SELECTED:
             background_tasks.add_task(email_service.send_template_email, db, app, TemplateType.SELECTED)
         elif app_update.status == ApplicationStatus.REJECTED:
             background_tasks.add_task(email_service.send_template_email, db, app, TemplateType.REJECTED)
