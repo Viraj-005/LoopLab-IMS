@@ -125,12 +125,20 @@ async def download_cv(
     # Check if this is an S3 URL or local path
     if app.cv_file_path.startswith(('http://', 'https://')):
         from app.services.s3_service import s3_service
-        # Extract object name from URL
-        object_name = app.cv_file_path.split('/')[-1]
-        presigned_url = s3_service.get_presigned_url(object_name)
-        if presigned_url:
-            from fastapi.responses import RedirectResponse
-            return RedirectResponse(presigned_url)
+        from urllib.parse import urlparse
+        object_name = urlparse(app.cv_file_path).path.lstrip('/')
+        
+        if s3_service.enabled and s3_service.s3_client:
+            try:
+                s3_obj = s3_service.s3_client.get_object(Bucket=s3_service.bucket_name, Key=object_name)
+                from fastapi.responses import StreamingResponse
+                return StreamingResponse(
+                    content=s3_obj['Body'].iter_chunks(), 
+                    media_type='application/pdf',
+                    headers={"Content-Disposition": f"inline; filename={app.cv_original_filename or object_name}"}
+                )
+            except Exception as e:
+                raise HTTPException(status_code=404, detail="Artifact could not be extracted from AWS S3 vault.")
 
     return FileResponse(
         app.cv_file_path, 
@@ -156,11 +164,20 @@ async def download_cover_letter(
     # Check if this is an S3 URL or local path
     if app.cover_letter_path.startswith(('http://', 'https://')):
         from app.services.s3_service import s3_service
-        object_name = app.cover_letter_path.split('/')[-1]
-        presigned_url = s3_service.get_presigned_url(object_name)
-        if presigned_url:
-            from fastapi.responses import RedirectResponse
-            return RedirectResponse(presigned_url)
+        from urllib.parse import urlparse
+        object_name = urlparse(app.cover_letter_path).path.lstrip('/')
+        
+        if s3_service.enabled and s3_service.s3_client:
+            try:
+                s3_obj = s3_service.s3_client.get_object(Bucket=s3_service.bucket_name, Key=object_name)
+                from fastapi.responses import StreamingResponse
+                return StreamingResponse(
+                    content=s3_obj['Body'].iter_chunks(), 
+                    media_type='application/pdf',
+                    headers={"Content-Disposition": f"inline; filename={app.cover_letter_original_filename or object_name}"}
+                )
+            except Exception as e:
+                raise HTTPException(status_code=404, detail="Artifact could not be extracted from AWS S3 vault.")
 
     return FileResponse(
         app.cover_letter_path, 

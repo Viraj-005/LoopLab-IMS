@@ -41,13 +41,22 @@ class S3Service:
             return None
             
         try:
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=object_name,
-                Body=file_content,
-                ContentType=content_type,
-                ACL=acl
-            )
+            kwargs = {
+                'Bucket': self.bucket_name,
+                'Key': object_name,
+                'Body': file_content,
+                'ContentType': content_type,
+            }
+            try:
+                self.s3_client.put_object(**kwargs, ACL=acl)
+            except ClientError as e:
+                # If bucket has Block Public Access / Object Ownership Enforced, ACLs cause access denied. 
+                # Fallback to no-ACL upload.
+                if 'AccessDenied' in str(e) or 'InvalidBucketAclWithObjectOwnership' in str(e):
+                    self.s3_client.put_object(**kwargs)
+                else:
+                    raise e
+                    
             # Return the direct S3 URL
             return f"https://{self.bucket_name}.s3.{self.region}.amazonaws.com/{object_name}"
         except ClientError as e:
