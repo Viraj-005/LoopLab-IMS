@@ -111,8 +111,8 @@ async def download_my_cv(
     if not app or not app.cv_file_path:
         raise HTTPException(status_code=404, detail="CV artifact not found.")
     
-    # Check if this is an S3 URL or a local path
-    if app.cv_file_path.startswith('http'):
+    # Check if this is an S3 URL or local path
+    if app.cv_file_path.startswith(('http://', 'https://')):
         # Extract object name from URL
         # URL format: https://bucket.s3.region.amazonaws.com/object_name
         object_name = app.cv_file_path.split('/')[-1]
@@ -145,8 +145,8 @@ async def download_my_cover_letter(
     if not app or not app.cover_letter_path:
         raise HTTPException(status_code=404, detail="Cover letter artifact not found.")
     
-    # Check if this is an S3 URL or a local path
-    if app.cover_letter_path.startswith('http'):
+    # Check if this is an S3 URL or local path
+    if app.cover_letter_path.startswith(('http://', 'https://')):
         object_name = app.cover_letter_path.split('/')[-1]
         presigned_url = s3_service.get_presigned_url(object_name)
         if presigned_url:

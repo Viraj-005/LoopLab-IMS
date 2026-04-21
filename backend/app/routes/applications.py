@@ -122,6 +122,16 @@ async def download_cv(
     if not app.cv_file_path:
         raise HTTPException(status_code=404, detail="CV not available")
         
+    # Check if this is an S3 URL or local path
+    if app.cv_file_path.startswith(('http://', 'https://')):
+        from app.services.s3_service import s3_service
+        # Extract object name from URL
+        object_name = app.cv_file_path.split('/')[-1]
+        presigned_url = s3_service.get_presigned_url(object_name)
+        if presigned_url:
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(presigned_url)
+
     return FileResponse(
         app.cv_file_path, 
         media_type='application/pdf',
@@ -143,6 +153,15 @@ async def download_cover_letter(
     if not app.cover_letter_path:
         raise HTTPException(status_code=404, detail="Cover letter not available")
         
+    # Check if this is an S3 URL or local path
+    if app.cover_letter_path.startswith(('http://', 'https://')):
+        from app.services.s3_service import s3_service
+        object_name = app.cover_letter_path.split('/')[-1]
+        presigned_url = s3_service.get_presigned_url(object_name)
+        if presigned_url:
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(presigned_url)
+
     return FileResponse(
         app.cover_letter_path, 
         media_type='application/pdf',
