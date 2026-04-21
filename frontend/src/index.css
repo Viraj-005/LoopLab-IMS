@@ -55,7 +55,26 @@
   }
 
   .kinetic-gradient {
-    background: linear-gradient(135deg, #613380 0%, #7a4b9a 100%);
+    background: linear-gradient(135deg, #613380 0%, #7a4b9a 45%, #3c6184 100%);
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 5s ease infinite;
+  }
+
+  @keyframes gradient-x {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   .ambient-shadow {

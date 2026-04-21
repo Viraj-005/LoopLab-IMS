@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import logo from '../assets/logo.jpeg';
 
 const Login = ({ setUser }) => {
   const [activeTab, setActiveTab] = useState('staff');
@@ -103,12 +104,12 @@ const Login = ({ setUser }) => {
 
         <div className="relative z-10 max-w-xl text-white space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
            <div className="space-y-6">
-              <div className="w-20 h-20 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl flex items-center justify-center shadow-2xl">
-                 <span className="material-symbols-outlined text-4xl text-white">deployed_code</span>
-              </div>
+            <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden p-2 group hover:scale-105 transition-transform duration-500">
+               <img src={logo} alt="LoopLab Logo" className="w-full h-full object-contain" />
+            </div>
               <h1 className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1.05] font-headline">
                 Recruitment <br />
-                <span className="text-primary-light">Intelligence</span> <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#efcfff] via-primary-light to-[#3c6184] animate-gradient-x">Intelligence</span> <br />
                 Redefined.
               </h1>
            </div>
@@ -135,10 +136,10 @@ const Login = ({ setUser }) => {
         
         {/* Mobile Logo */}
         <div className="md:hidden mb-12 flex flex-col items-center">
-            <div className="w-16 h-16 kinetic-gradient rounded-2xl flex items-center justify-center text-white mb-4 shadow-xl shadow-primary/20">
-               <span className="material-symbols-outlined text-3xl">deployed_code</span>
+            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-primary/10 p-2">
+               <img src={logo} alt="LoopLab Logo" className="w-full h-full object-contain" />
             </div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter font-headline">LOOPLAB/IMS</h2>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tighter font-headline">LOOPLAB</h2>
         </div>
 
         <div className="w-full max-w-[440px] space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
