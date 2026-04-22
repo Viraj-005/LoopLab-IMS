@@ -20,7 +20,7 @@ const InternLayout = ({ children, user, onLogout }) => {
   return (
     <div className="min-h-screen bg-surface dark:bg-dark-surface flex flex-col font-body antialiased transition-all duration-300">
       {/* ── Top Navigation ── */}
-      <nav className="h-20 glass-nav border-b border-slate-200/50 dark:border-dark-border sticky top-0 z-50 px-6 lg:px-12 flex items-center justify-between">
+      <nav className="h-16 md:h-20 glass-nav border-b border-slate-200/50 dark:border-dark-border sticky top-0 z-50 px-4 md:px-8 lg:px-12 flex items-center justify-between">
         <div className="flex items-center gap-10">
             {/* Brand */}
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/intern/dashboard')}>
@@ -85,7 +85,7 @@ const InternLayout = ({ children, user, onLogout }) => {
       </nav>
 
       {/* ── Main Content ── */}
-      <main className="flex-1 p-8 lg:p-12">
+      <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="max-w-[1400px] mx-auto">
           {children}
         </div>

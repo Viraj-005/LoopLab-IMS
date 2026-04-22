@@ -44,11 +44,11 @@ const InternBrowseJobs = () => {
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header>
-        <h1 className="text-5xl font-black tracking-tight text-on-surface font-headline mb-2">Open Streams</h1>
-        <p className="text-on-surface-variant font-medium text-lg">Browse active internship opportunities and deploy your professional protocol.</p>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-on-surface font-headline mb-2">Open Streams</h1>
+        <p className="text-on-surface-variant font-medium text-base sm:text-lg">Browse active internship opportunities and deploy your professional protocol.</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
         {jobs.map((job) => {
           const seatsLeft = Math.max(0, job.capacity - (job.application_count || 0));
           const tags = job.tags ? job.tags.split(',').map(t => t.trim()) : [];
@@ -102,7 +102,7 @@ const InternBrowseJobs = () => {
               </div>
               
               {/* Core Content */}
-              <div className="flex-1 p-10 flex flex-col">
+              <div className="flex-1 p-6 sm:p-8 md:p-10 flex flex-col">
                   <div className="flex-1 space-y-6">
                       <div className="flex items-center gap-4">
                           <div 
@@ -119,7 +119,7 @@ const InternBrowseJobs = () => {
                               </span>
                           </div>
                           <div className="min-w-0">
-                             <h3 className="text-2xl font-black text-on-surface font-headline leading-tight truncate group-hover:text-primary transition-colors">
+                             <h3 className="text-xl sm:text-2xl font-black text-on-surface font-headline leading-tight truncate group-hover:text-primary transition-colors">
                                 {job.title}
                              </h3>
                           </div>
@@ -183,7 +183,7 @@ const InternBrowseJobs = () => {
                       ) : (
                         <button 
                             onClick={() => navigate(`/intern/apply/${job.id}`)}
-                            className="w-full h-16 bg-slate-900 text-white rounded-2xl hover:bg-black hover:shadow-2xl hover:shadow-primary/20 transition-all flex items-center justify-center border border-slate-800 relative group/btn overflow-hidden"
+                            className="w-full h-14 sm:h-16 bg-slate-900 text-white rounded-2xl hover:bg-black hover:shadow-2xl hover:shadow-primary/20 transition-all flex items-center justify-center border border-slate-800 relative group/btn overflow-hidden"
                         >
                             <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em] group-hover/btn:mr-4 transition-all">Initialize Application</span>
                             <span className="material-symbols-outlined text-sm absolute right-12 opacity-0 group-hover/btn:opacity-100 group-hover/btn:right-10 transition-all duration-300">arrow_forward</span>

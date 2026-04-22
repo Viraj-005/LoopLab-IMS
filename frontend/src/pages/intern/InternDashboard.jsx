@@ -86,10 +86,10 @@ const InternDashboard = () => {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
       <header className="flex justify-between items-start">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-on-surface font-headline mb-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-on-surface font-headline mb-2">
             Welcome back, {user?.first_name || 'Innovator'}!
           </h1>
-          <p className="text-on-surface-variant font-medium text-lg">Tracks your applications and manage your professional laboratory profile.</p>
+          <p className="text-on-surface-variant font-medium text-sm sm:text-base md:text-lg">Tracks your applications and manage your professional laboratory profile.</p>
         </div>
         
         <button 
@@ -107,10 +107,10 @@ const InternDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Profile Status Card */}
-        <div className="md:col-span-8 glass-card p-8 rounded-3xl border-white hover:shadow-xl transition-all group flex flex-col justify-between">
+        <div className="md:col-span-8 glass-card p-6 sm:p-8 rounded-3xl border-white hover:shadow-xl transition-all group flex flex-col justify-between">
             <div className="flex justify-between items-start mb-6">
                 <div>
-                   <h3 className="text-xl font-black text-on-surface font-headline">Profile Integrity</h3>
+                   <h3 className="text-lg sm:text-xl font-black text-on-surface font-headline">Profile Integrity</h3>
                    <p className="text-sm text-on-surface-variant font-medium">Complete your details to increase your visibility to HR.</p>
                 </div>
                 <div className="w-12 h-12 rounded-2xl kinetic-gradient flex items-center justify-center text-white">
@@ -138,7 +138,7 @@ const InternDashboard = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="md:col-span-4 glass-card p-8 rounded-3xl border-white bg-primary/5 flex flex-col justify-center items-center text-center space-y-4 cursor-pointer hover:scale-105 transition-all" onClick={() => navigate('/intern/applications')}>
+        <div className="md:col-span-4 glass-card p-6 sm:p-8 rounded-3xl border-white bg-primary/5 flex flex-col justify-center items-center text-center space-y-4 cursor-pointer hover:scale-105 transition-all" onClick={() => navigate('/intern/applications')}>
             <div className="text-5xl font-black text-primary font-headline tracking-tighter">{applications.length}</div>
             <div>
                <p className="text-sm font-black text-on-surface uppercase tracking-widest">Active Applications</p>
@@ -158,7 +158,7 @@ const InternDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Recent Evaluation Activity */}
         <div className="lg:col-span-7 space-y-6">
-          <h3 className="text-xl font-black text-on-surface font-headline">Recent Evaluation Activity</h3>
+          <h3 className="text-lg sm:text-xl font-black text-on-surface font-headline">Recent Evaluation Activity</h3>
           {applications.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {applications.slice(0, 4).map((app) => (
@@ -190,11 +190,11 @@ const InternDashboard = () => {
 
         {/* Strategic Analysis Chart */}
         <div className="lg:col-span-5 space-y-6">
-          <h3 className="text-xl font-black text-on-surface font-headline">Strategic Protocol Analysis</h3>
-          <div className="glass-card p-8 rounded-[2.5rem] border-white h-[280px] flex items-center justify-center relative overflow-hidden">
+          <h3 className="text-lg sm:text-xl font-black text-on-surface font-headline">Strategic Protocol Analysis</h3>
+          <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] border-white min-h-[280px] flex items-center justify-center relative overflow-hidden">
             {chartData.length > 0 ? (
-              <div className="w-full h-full flex items-center">
-                <div className="w-1/2 h-full">
+              <div className="w-full h-full flex flex-col sm:flex-row items-center gap-6 sm:gap-0">
+                <div className="w-full sm:w-1/2 h-[180px] sm:h-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -214,7 +214,7 @@ const InternDashboard = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="w-1/2 space-y-3 pl-4">
+                <div className="w-full sm:w-1/2 space-y-3 sm:pl-4">
                    {chartData.map((d, i) => (
                      <div key={i} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">

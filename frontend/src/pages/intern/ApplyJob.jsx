@@ -91,16 +91,16 @@ const ApplyJob = () => {
         <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-primary/20 mb-4 inline-block">
             Stream: {job.category}
         </span>
-        <h1 className="text-5xl font-black tracking-tight text-on-surface font-headline mb-2 leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-on-surface font-headline mb-2 leading-tight">
           Apply for {job.title}
         </h1>
-        <p className="text-on-surface-variant font-medium text-lg">Initialize your application protocol for this stream.</p>
+        <p className="text-on-surface-variant font-medium text-base sm:text-lg">Initialize your application protocol for this stream.</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         <div className="lg:col-span-7 space-y-8">
           {job.applied ? (
-            <div className="glass-card p-16 rounded-[3rem] border-emerald-100 bg-emerald-50/30 flex flex-col items-center text-center space-y-8 animate-in zoom-in duration-500">
+            <div className="glass-card p-8 sm:p-12 md:p-16 rounded-[3rem] border-emerald-100 bg-emerald-50/30 flex flex-col items-center text-center space-y-8 animate-in zoom-in duration-500">
                 <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-inner">
                     <span className="material-symbols-outlined text-5xl">verified</span>
                 </div>
@@ -118,8 +118,8 @@ const ApplyJob = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Core Identity Check */}
-              <div className="glass-card p-10 rounded-[2.5rem] border-white space-y-8">
-                  <h3 className="text-2xl font-black text-on-surface font-headline flex items-center gap-3">
+              <div className="glass-card p-6 sm:p-8 md:p-10 rounded-[2.5rem] border-white space-y-8">
+                  <h3 className="text-xl sm:text-2xl font-black text-on-surface font-headline flex items-center gap-3">
                       <span className="material-symbols-outlined text-primary">person_check</span>
                       Identity Verification
                   </h3>
@@ -155,8 +155,8 @@ const ApplyJob = () => {
               </div>
 
               {/* Documentation Upload */}
-              <div className="glass-card p-10 rounded-[2.5rem] border-white space-y-8">
-                  <h3 className="text-2xl font-black text-on-surface font-headline flex items-center gap-3">
+              <div className="glass-card p-6 sm:p-8 md:p-10 rounded-[2.5rem] border-white space-y-8">
+                  <h3 className="text-xl sm:text-2xl font-black text-on-surface font-headline flex items-center gap-3">
                       <span className="material-symbols-outlined text-primary">upload_file</span>
                       Documentation Logs
                   </h3>
@@ -222,10 +222,10 @@ const ApplyJob = () => {
                   >
                       Protocol Cancel
                   </button>
-                  <button 
+                   <button 
                       type="submit" 
                       disabled={submitting}
-                      className="hero-gradient text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
+                      className="hero-gradient text-white px-8 sm:px-12 py-4 sm:py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
                   >
                       {submitting ? 'Deploying...' : 'Deploy Application'}
                       <span className="material-symbols-outlined text-sm">rocket_launch</span>

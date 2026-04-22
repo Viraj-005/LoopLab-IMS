@@ -147,8 +147,8 @@ const MyApplications = () => {
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 mb-20">
       <header>
-        <h1 className="text-5xl font-black tracking-tight text-on-surface font-headline mb-2">Protocol History</h1>
-        <p className="text-on-surface-variant font-medium text-lg">Tracks your active recruitment streams and status logs.</p>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-on-surface font-headline mb-2">Protocol History</h1>
+        <p className="text-on-surface-variant font-medium text-base sm:text-lg">Tracks your active recruitment streams and status logs.</p>
       </header>
 
       {applications.length === 0 ? (
@@ -167,14 +167,14 @@ const MyApplications = () => {
                   <button 
                     key={app.id} 
                     onClick={() => handleViewDetails(app.id)}
-                    className="w-full text-left glass-card p-8 rounded-[2rem] border-white hover:border-primary/40 hover:bg-white transition-all group flex items-center justify-between shadow-sm hover:shadow-xl shadow-primary/5 active:scale-[0.99]"
+                    className="w-full text-left glass-card p-5 sm:p-6 md:p-8 rounded-[2rem] border-white hover:border-primary/40 hover:bg-white transition-all group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 sm:gap-0 shadow-sm hover:shadow-xl shadow-primary/5 active:scale-[0.99]"
                   >
-                      <div className="flex items-center gap-8">
-                          <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                              <History size={28} />
+                      <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                              <History size={24} className="sm:w-[28px] sm:h-[28px]" />
                           </div>
                           <div>
-                              <h3 className="text-2xl font-black text-on-surface font-headline group-hover:text-primary transition-colors">{app.applied_role}</h3>
+                              <h3 className="text-lg sm:text-xl md:text-2xl font-black text-on-surface font-headline group-hover:text-primary transition-colors">{app.applied_role}</h3>
                               <div className="flex items-center gap-4 mt-2">
                                   <div className="flex items-center gap-1.5 opacity-60">
                                       <Calendar size={12} className="text-primary" />
@@ -193,12 +193,12 @@ const MyApplications = () => {
                           </div>
                       </div>
 
-                      <div className="flex items-center gap-8">
-                          <div className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm ${getStatusColor(app.status)}`}>
+                      <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4 sm:gap-6 md:gap-8">
+                          <div className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm ${getStatusColor(app.status)}`}>
                               {app.status}
                           </div>
-                          <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-primary group-hover:border-primary/20 transition-all">
-                              <ArrowUpRight size={18} />
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-primary group-hover:border-primary/20 transition-all">
+                              <ArrowUpRight size={16} className="sm:w-[18px] sm:h-[18px]" />
                           </div>
                       </div>
                   </button>
@@ -303,9 +303,9 @@ const MyApplications = () => {
                       </div>
 
                       {/* Display Column (Previewer) */}
-                      <div className="lg:col-span-8 space-y-6">
-                            <div className="glass-card rounded-[2.5rem] border-white shadow-2xl overflow-hidden flex flex-col h-[700px] bg-slate-900">
-                                <div className="px-8 py-4 border-b border-white/5 flex justify-between items-center bg-black/20 backdrop-blur-md">
+                       <div className="lg:col-span-8 space-y-6">
+                            <div className="glass-card rounded-[2.5rem] border-white shadow-2xl overflow-hidden flex flex-col h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] bg-slate-900">
+                                <div className="px-4 sm:px-8 py-4 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center bg-black/20 backdrop-blur-md gap-4 sm:gap-0">
                                     <div className="flex items-center gap-4">
                                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                                         <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">

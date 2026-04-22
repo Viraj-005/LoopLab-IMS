@@ -113,14 +113,14 @@ const InternProfile = () => {
   return (
     <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 mb-20">
       <header>
-        <h1 className="text-5xl font-black tracking-tight text-on-surface font-headline mb-2">Profile Laboratory</h1>
-        <p className="text-on-surface-variant font-medium text-lg">Define your professional identity to the recruitment algorithm.</p>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-on-surface font-headline mb-2">Profile Laboratory</h1>
+        <p className="text-on-surface-variant font-medium text-base sm:text-lg">Define your professional identity to the recruitment algorithm.</p>
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Core Profile */}
-        <div className="glass-card p-10 rounded-[2.5rem] border-white space-y-8">
-            <h3 className="text-2xl font-black text-on-surface font-headline flex items-center gap-3">
+        <div className="glass-card p-6 sm:p-8 md:p-10 rounded-[2.5rem] border-white space-y-8">
+            <h3 className="text-xl sm:text-2xl font-black text-on-surface font-headline flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">badge</span>
                 Core Identity
             </h3>
@@ -158,9 +158,9 @@ const InternProfile = () => {
         </div>
 
         {/* Academic Credentials Section */}
-        <div className="glass-card p-10 rounded-[2.5rem] border-white space-y-8">
+        <div className="glass-card p-6 sm:p-8 md:p-10 rounded-[2.5rem] border-white space-y-8">
             <div className="flex justify-between items-center">
-                <h3 className="text-2xl font-black text-on-surface font-headline flex items-center gap-3">
+                <h3 className="text-xl sm:text-2xl font-black text-on-surface font-headline flex items-center gap-3">
                     <span className="material-symbols-outlined text-primary">school</span>
                     Academic Credentials
                 </h3>
@@ -175,7 +175,7 @@ const InternProfile = () => {
             
             <div className="space-y-10">
                 {formData.education_history.map((edu, idx) => (
-                    <div key={idx} className="relative p-8 bg-white/40 rounded-3xl border border-slate-100 group animate-in zoom-in-95 duration-200">
+                    <div key={idx} className="relative p-5 sm:p-6 md:p-8 bg-white/40 rounded-3xl border border-slate-100 group animate-in zoom-in-95 duration-200">
                         <button 
                             type="button"
                             onClick={() => removeArrayItem('education_history', idx)}
@@ -270,9 +270,9 @@ const InternProfile = () => {
         </div>
 
         {/* Work Experience Section */}
-        <div className="glass-card p-10 rounded-[2.5rem] border-white space-y-8">
+        <div className="glass-card p-6 sm:p-8 md:p-10 rounded-[2.5rem] border-white space-y-8">
             <div className="flex justify-between items-center">
-                <h3 className="text-2xl font-black text-on-surface font-headline flex items-center gap-3">
+                <h3 className="text-xl sm:text-2xl font-black text-on-surface font-headline flex items-center gap-3">
                     <span className="material-symbols-outlined text-primary">work</span>
                     Work Experience
                 </h3>
@@ -287,7 +287,7 @@ const InternProfile = () => {
             
             <div className="space-y-10">
                 {formData.work_experience.map((exp, idx) => (
-                    <div key={idx} className="relative p-8 bg-white/40 rounded-3xl border border-slate-100 group animate-in zoom-in-95 duration-200">
+                    <div key={idx} className="relative p-5 sm:p-6 md:p-8 bg-white/40 rounded-3xl border border-slate-100 group animate-in zoom-in-95 duration-200">
                         <button 
                             type="button"
                             onClick={() => removeArrayItem('work_experience', idx)}
@@ -371,8 +371,8 @@ const InternProfile = () => {
         </div>
 
         {/* Professional Connectivity */}
-        <div className="glass-card p-10 rounded-[2.5rem] border-white space-y-8">
-            <h3 className="text-2xl font-black text-on-surface font-headline flex items-center gap-3">
+        <div className="glass-card p-6 sm:p-8 md:p-10 rounded-[2.5rem] border-white space-y-8">
+            <h3 className="text-xl sm:text-2xl font-black text-on-surface font-headline flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">link</span>
                 Protocol Links
             </h3>
@@ -415,7 +415,7 @@ const InternProfile = () => {
             <button 
                 type="submit" 
                 disabled={saving}
-                className="hero-gradient text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
+                className="hero-gradient text-white px-8 sm:px-12 py-4 sm:py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
             >
                 {saving ? 'Synchronizing...' : 'Update Protocol'}
                 <span className="material-symbols-outlined text-sm">sync</span>
