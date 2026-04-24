@@ -193,8 +193,8 @@ const InternDashboard = () => {
           <h3 className="text-lg sm:text-xl font-black text-on-surface font-headline">Strategic Protocol Analysis</h3>
           <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] border-white min-h-[280px] flex items-center justify-center relative overflow-hidden">
             {chartData.length > 0 ? (
-              <div className="w-full h-full flex flex-col sm:flex-row items-center gap-6 sm:gap-0">
-                <div className="w-full sm:w-1/2 h-[180px] sm:h-full">
+              <div className="w-full flex flex-col sm:flex-row items-center gap-6 sm:gap-0">
+                <div className="w-full sm:w-1/2 h-[220px] sm:h-[260px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
