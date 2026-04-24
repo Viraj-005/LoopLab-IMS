@@ -388,12 +388,21 @@ const InternProfile = () => {
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">GitHub / Portfolio URL</label>
+                    <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">GitHub URL</label>
                     <input 
                         name="github_url"
                         value={formData.github_url}
                         onChange={handleChange}
-                        className="w-full bg-white/60 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none"
+                        className="w-full bg-white/60 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:ring-2 ring-primary/20 focus:border-primary"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">Portfolio URL (Optional)</label>
+                    <input 
+                        name="portfolio_url"
+                        value={formData.portfolio_url}
+                        onChange={handleChange}
+                        className="w-full bg-white/60 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:ring-2 ring-primary/20 focus:border-primary"
                     />
                 </div>
             </div>

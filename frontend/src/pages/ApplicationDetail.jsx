@@ -347,6 +347,7 @@ const ApplicationDetail = () => {
                 {[
                   { label: 'Signal ID', value: app.applicant_name, icon: 'person' },
                   { label: 'Coordinate', value: app.email, icon: 'alternate_email' },
+                  { label: 'Reference ID', value: app.id.substring(0, 8).toUpperCase(), icon: 'fingerprint' },
                   { label: 'Target Logic', value: app.applied_role || 'Unspecified', icon: 'settings_input_component' },
                   { label: 'Cycle Received', value: new Date(app.received_at).toLocaleDateString(), icon: 'event' },
                 ].map((item, i) => (

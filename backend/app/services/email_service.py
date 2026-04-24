@@ -21,6 +21,16 @@ class EmailService:
         self.smtp_user = settings.smtp_user
         self.smtp_password = settings.smtp_password
         self.from_email = settings.from_email
+        
+    def stamp_subject(self, subject: str, application_id: Any) -> str:
+        """Append [Ref: ID] to the subject line for smart tracking"""
+        if not application_id:
+            return subject
+        short_id = str(application_id)[:8].upper()
+        ref_tag = f"[Ref: {short_id}]"
+        if ref_tag not in subject:
+            return f"{subject} {ref_tag}"
+        return subject
 
     async def send_email(self, to_email: str, subject: str, html_body: str) -> bool:
         """Send email using asynchronous SMTP"""
@@ -92,6 +102,9 @@ class EmailService:
             **extra_variables
         }
         subject, body = template.render(**variables)
+        
+        # Add Smart Reference ID to Subject
+        subject = self.stamp_subject(subject, application.id)
         
         # Send
         success = await self.send_email(application.email, subject, body)

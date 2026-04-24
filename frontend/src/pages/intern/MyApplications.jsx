@@ -12,14 +12,19 @@ import {
     History,
     FileSearch,
     Eye,
-    ExternalLink
+    ExternalLink,
+    Copy,
+    Check
 } from 'lucide-react';
 import api from '../../services/api';
 import Modal from '../../components/Modal';
+import { useNotification } from '../../context/NotificationContext';
 
 const MyApplications = () => {
+  const { showNotification } = useNotification();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [copyingId, setCopyingId] = useState(null);
   
   // Detail Modal State
   const [selectedApp, setSelectedApp] = useState(null);
@@ -130,6 +135,15 @@ const MyApplications = () => {
       }
   };
 
+  const handleCopyId = (e, appId) => {
+      e.stopPropagation();
+      const shortId = appId.substring(0, 8).toUpperCase();
+      navigator.clipboard.writeText(shortId);
+      setCopyingId(appId);
+      showNotification(`Reference ID ${shortId} copied to clipboard`, "success");
+      setTimeout(() => setCopyingId(null), 2000);
+  };
+
   const handleOpenInNewTab = (type) => {
       const url = type === 'cv' ? previewUrl : clPreviewUrl;
       if (url) {
@@ -183,12 +197,17 @@ const MyApplications = () => {
                                       </span>
                                   </div>
                                   <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-                                  <div className="flex items-center gap-1.5 opacity-60">
-                                      <Hash size={12} className="text-primary" />
+                                  <button 
+                                      onClick={(e) => handleCopyId(e, app.id)}
+                                      className="flex items-center gap-1.5 opacity-60 hover:opacity-100 hover:text-primary transition-all group/copy"
+                                      title="Copy Reference ID"
+                                  >
+                                      {copyingId === app.id ? <Check size={12} className="text-emerald-500" /> : <Hash size={12} className="text-primary group-hover/copy:scale-110 transition-transform" />}
                                       <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">
                                           ID: {app.id.substring(0, 8)}
                                       </span>
-                                  </div>
+                                      {copyingId !== app.id && <Copy size={10} className="opacity-0 group-hover/copy:opacity-100 transition-opacity" />}
+                                  </button>
                               </div>
                           </div>
                       </div>
@@ -246,6 +265,19 @@ const MyApplications = () => {
                                 <div className="pt-4 border-t border-black/5">
                                     <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Deployed On</p>
                                     <p className="text-xs font-bold">{new Date(selectedApp.received_at).toLocaleString()}</p>
+                                </div>
+                                <div className="pt-4 border-t border-black/5 flex justify-between items-center group/copy">
+                                    <div>
+                                        <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Reference ID</p>
+                                        <p className="text-xs font-bold font-mono tracking-wider">{selectedApp.id.substring(0, 8).toUpperCase()}</p>
+                                    </div>
+                                    <button 
+                                        onClick={(e) => handleCopyId(e, selectedApp.id)}
+                                        className="p-2 rounded-lg hover:bg-black/5 transition-all"
+                                        title="Copy Full Reference ID"
+                                    >
+                                        {copyingId === selectedApp.id ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} className="opacity-40 group-hover/copy:opacity-100" />}
+                                    </button>
                                 </div>
                             </div>
 

@@ -122,7 +122,7 @@ async def update_application_status(
                 new_notif = Notification(
                     intern_id=app.intern_id,
                     application_id=app.id,
-                    subject="New Interview Invitation Scheduled",
+                    subject=email_service.stamp_subject("New Interview Invitation Scheduled", app.id),
                     body=notification_body
                 )
                 db.add(new_notif)
@@ -270,13 +270,13 @@ async def send_email_to_applicant(
         new_notif = Notification(
             intern_id=app.intern_id,
             application_id=app.id,
-            subject=email_data.subject,
+            subject=email_service.stamp_subject(email_data.subject, app.id),
             body=email_data.body
         )
         db.add(new_notif)
         
         # 2. Send Email Alert (Not the full message, just an alert)
-        alert_subject = "New Signal Received on Your Dashboard"
+        alert_subject = email_service.stamp_subject("New Signal Received on Your Dashboard", app.id)
         alert_body = f"""
         Hello,
         
@@ -294,8 +294,9 @@ async def send_email_to_applicant(
         log_msg = f"Sent portal signal and email alert: {email_data.subject}"
     else:
         # EMAIL source - send full email directly
-        success = await email_service.send_email(app.email, email_data.subject, email_data.body)
-        log_msg = f"Sent manual email: {email_data.subject}"
+        subject = email_service.stamp_subject(email_data.subject, app.id)
+        success = await email_service.send_email(app.email, subject, email_data.body)
+        log_msg = f"Sent manual email: {subject}"
 
     if not success:
         raise HTTPException(status_code=500, detail="Failed to send official signal")

@@ -8,6 +8,15 @@ from datetime import datetime
 from app.models.intern import OAuthProvider
 
 
+class ApplicationSummary(BaseModel):
+    id: UUID
+    applied_role: str
+    status: str
+    received_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class InternBase(BaseModel):
     email: EmailStr
     first_name: str
@@ -61,6 +70,10 @@ class Intern(InternBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class InternRegistryDetail(Intern):
+    applications: list[ApplicationSummary] = []
 
 
 class InternToken(BaseModel):
