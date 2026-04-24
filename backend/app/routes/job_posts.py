@@ -12,7 +12,7 @@ from app.models.job_post import JobPost, JobStatus, JobCategory
 from app.models.application import Application
 from app.models.user import User
 from app.schemas.job_post import JobPostCreate, JobPostUpdate, JobPost as JobPostSchema, JobPostList
-from app.services.auth_service import get_current_staff, get_any_active_user
+from app.services.auth_service import get_current_staff, get_any_active_user, get_optional_user_data
 from app.config import get_settings
 from app.utils.file_utils import save_upload_file, get_media_presigned_url
 
@@ -80,14 +80,16 @@ async def list_job_posts(
     status: Optional[JobStatus] = None,
     category: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    auth_data: dict = Depends(get_any_active_user)
+    auth_data: Optional[dict] = Depends(get_optional_user_data)
 ):
-    """List job posts with real application counts"""
-    is_intern = auth_data["type"] == "intern"
-    
-    # If intern, they can only see Live jobs
-    if is_intern:
+    """List job posts with real application counts. Public endpoint - no auth required."""
+    is_intern = auth_data is not None and auth_data.get("type") == "intern"
+    is_staff = auth_data is not None and auth_data.get("type") == "staff"
+
+    # Public users and interns can only see Live jobs
+    if not is_staff:
         status = JobStatus.LIVE
+
     # Use a subquery to count applications per job
     app_count_sub = (
         select(
@@ -110,12 +112,12 @@ async def list_job_posts(
         query = query.where(JobPost.status == status)
     if category:
         query = query.where(JobPost.category == category)
-    
+
     query = query.order_by(JobPost.created_at.desc())
-    
+
     result = await db.execute(query)
     rows = result.all()
-    
+
     # If intern, check which jobs they've applied to
     applied_ids = set()
     if is_intern:
@@ -123,8 +125,8 @@ async def list_job_posts(
         app_query = select(Application.job_id).where(Application.intern_id == intern_obj.id)
         app_res = await db.execute(app_query)
         applied_ids = set(app_res.scalars().all())
-    
-    # Process rows to attach application_count and applied flag to job objects
+
+    # Process rows to attach application_count and applied flag
     items = []
     for job, count in rows:
         job.application_count = count
@@ -132,17 +134,17 @@ async def list_job_posts(
         # Transform S3 URL to Presigned URL
         job.media_url = get_media_presigned_url(job.media_url)
         items.append(job)
-    
+
     # Total count for pagination
     count_query = select(func.count()).select_from(JobPost)
     if status:
         count_query = count_query.where(JobPost.status == status)
     if category:
         count_query = count_query.where(JobPost.category == category)
-    
+
     count_result = await db.execute(count_query)
     total = count_result.scalar()
-    
+
     return {"items": items, "total": total}
 
 
@@ -150,35 +152,36 @@ async def list_job_posts(
 async def get_job_post(
     job_id: UUID,
     db: AsyncSession = Depends(get_db),
-    auth_data: dict = Depends(get_any_active_user)
+    auth_data: Optional[dict] = Depends(get_optional_user_data)
 ):
-    """Get details of a specific job post"""
-    is_intern = auth_data["type"] == "intern"
-    
+    """Get details of a specific job post. Public endpoint - no auth required."""
+    is_intern = auth_data is not None and auth_data.get("type") == "intern"
+    is_staff = auth_data is not None and auth_data.get("type") == "staff"
+
     query = select(JobPost).where(JobPost.id == job_id)
     result = await db.execute(query)
     job = result.scalar_one_or_none()
-    
+
     if not job:
         raise HTTPException(status_code=404, detail="Job post not found")
-        
-    # Interns can only see Live jobs
-    if is_intern and job.status != JobStatus.LIVE:
-        raise HTTPException(status_code=403, detail="Forbidden: Draft or Closed job")
-        
-    # Check if applied
+
+    # Public users and interns can only see Live jobs
+    if not is_staff and job.status != JobStatus.LIVE:
+        raise HTTPException(status_code=403, detail="This position is not currently open")
+
+    # Check if intern has already applied
     if is_intern:
         intern_obj = auth_data["obj"]
         app_query = select(Application.id).where(
-            Application.job_id == job_id, 
+            Application.job_id == job_id,
             Application.intern_id == intern_obj.id
         )
         app_res = await db.execute(app_query)
         job.applied = app_res.scalar_one_or_none() is not None
-    
+
     # Transform S3 URL to Presigned URL
     job.media_url = get_media_presigned_url(job.media_url)
-    
+
     return job
 
 

@@ -159,6 +159,39 @@ async def get_any_active_user(
     return data
 
 
+async def get_optional_user_data(
+    token: Optional[str] = Depends(OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)),
+    db: AsyncSession = Depends(get_db)
+) -> Optional[dict]:
+    """Dependency that returns user data if a valid token is present, otherwise None.
+    This allows public access to endpoints like job listings."""
+    if not token:
+        return None
+    try:
+        payload = decode_token(token)
+        user_id: str = payload.get("sub")
+        user_type: str = payload.get("user_type")
+
+        if not user_id or not user_type:
+            return None
+
+        if user_type == "staff":
+            result = await db.execute(select(User).where(User.id == uuid.UUID(user_id)))
+            user = result.scalar_one_or_none()
+            if user and user.is_active:
+                return {"type": "staff", "obj": user}
+
+        elif user_type == "intern":
+            result = await db.execute(select(Intern).where(Intern.id == uuid.UUID(user_id)))
+            intern = result.scalar_one_or_none()
+            if intern and intern.is_active:
+                return {"type": "intern", "obj": intern}
+
+        return None
+    except Exception:
+        return None
+
+
 def require_role(allowed_roles: List[UserRole]):
     """Dependency factory for RBAC"""
     def role_checker(user: User = Depends(get_current_staff)):

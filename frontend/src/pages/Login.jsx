@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import logo from '../assets/logo.jpeg';
 
@@ -14,6 +14,15 @@ const Login = ({ setUser }) => {
   const [twoFACode, setTwoFACode] = useState('');
   const [tempToken, setTempToken] = useState('');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Auto-switch to intern tab if redirected from LoopLab careers page
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'intern') {
+      setActiveTab('intern');
+    }
+  }, [searchParams]);
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 

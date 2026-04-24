@@ -37,7 +37,10 @@ app = FastAPI(
 origins = [
     settings.frontend_url,
     "http://localhost:5173",
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",       # LoopLab company webapp (local dev)
+    "http://127.0.0.1:5174",       # LoopLab company webapp (local dev alt)
 ]
 
 app.add_middleware(
