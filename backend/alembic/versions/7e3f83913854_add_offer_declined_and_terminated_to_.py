@@ -35,7 +35,17 @@ def upgrade() -> None:
     op.execute("ALTER TYPE templatetype ADD VALUE 'OFFER_DECLINED'")
     op.execute("ALTER TYPE templatetype ADD VALUE 'TERMINATED'")
 
-    op.drop_column('job_posts', 'expires_at')
+    op.execute("""
+        DO $$ 
+        BEGIN 
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns 
+                WHERE table_name='job_posts' AND column_name='expires_at'
+            ) THEN
+                ALTER TABLE job_posts DROP COLUMN expires_at;
+            END IF;
+        END $$;
+    """)
     # ### end Alembic commands ###
 
 
