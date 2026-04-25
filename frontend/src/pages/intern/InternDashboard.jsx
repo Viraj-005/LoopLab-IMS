@@ -34,7 +34,7 @@ const InternDashboard = () => {
   }, []);
 
   const getStatusData = () => {
-    const counts = { New: 0, Pending: 0, Selected: 0, Rejected: 0 };
+    const counts = { New: 0, Pending: 0, Selected: 0, Rejected: 0, 'Offer Declined': 0, Terminated: 0 };
     applications.forEach(app => {
       if (counts[app.status] !== undefined) counts[app.status]++;
     });
@@ -43,6 +43,8 @@ const InternDashboard = () => {
       { name: 'Pending', value: counts.Pending, color: '#94a3b8' },
       { name: 'Selected', value: counts.Selected, color: '#10b981' },
       { name: 'Rejected', value: counts.Rejected, color: '#ef4444' },
+      { name: 'Declined', value: counts['Offer Declined'], color: '#f97316' },
+      { name: 'Terminated', value: counts.Terminated, color: '#475569' },
     ].filter(d => d.value > 0);
   };
 
@@ -173,7 +175,13 @@ const InternDashboard = () => {
                   <div className="flex-1 min-w-0">
                       <h4 className="font-headline font-black text-on-surface truncate pr-2 text-sm">{app.applied_role}</h4>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className={`w-1.5 h-1.5 rounded-full ${app.status === 'New' ? 'bg-primary' : app.status === 'Selected' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          app.status === 'New' ? 'bg-primary' : 
+                          app.status === 'Selected' ? 'bg-emerald-500' : 
+                          app.status === 'Offer Declined' ? 'bg-orange-500' :
+                          app.status === 'Terminated' ? 'bg-slate-600' :
+                          'bg-slate-400'
+                        }`}></span>
                         <p className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant opacity-60">{app.status}</p>
                       </div>
                   </div>
@@ -324,7 +332,13 @@ const InternDashboard = () => {
                <div className="p-5 bg-primary/5 rounded-[1.5rem] border border-primary/10">
                   <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-1">Current Protocol Status</p>
                   <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${selectedApp.status === 'New' ? 'bg-primary' : selectedApp.status === 'Selected' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                    <span className={`w-2 h-2 rounded-full ${
+                      selectedApp.status === 'New' ? 'bg-primary' : 
+                      selectedApp.status === 'Selected' ? 'bg-emerald-500' : 
+                      selectedApp.status === 'Offer Declined' ? 'bg-orange-500' :
+                      selectedApp.status === 'Terminated' ? 'bg-slate-600' :
+                      'bg-slate-400'
+                    }`}></span>
                     <p className="text-sm font-black text-on-surface">{selectedApp.status}</p>
                   </div>
                </div>

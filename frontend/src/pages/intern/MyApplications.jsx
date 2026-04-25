@@ -108,6 +108,8 @@ const MyApplications = () => {
       case 'Selected': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       case 'Rejected': return 'bg-rose-50 text-rose-600 border-rose-100';
       case 'Pending': return 'bg-amber-50 text-amber-600 border-amber-100';
+      case 'Offer Declined': return 'bg-orange-50 text-orange-600 border-orange-100';
+      case 'Terminated': return 'bg-slate-100 text-slate-600 border-slate-200';
       default: return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   };
@@ -255,6 +257,8 @@ const MyApplications = () => {
                                     <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
                                         {selectedApp.status === 'Selected' ? <CheckCircle2 className="text-emerald-500" size={18} /> : 
                                         selectedApp.status === 'Rejected' ? <XCircle className="text-rose-500" size={18} /> : 
+                                        selectedApp.status === 'Offer Declined' ? <XCircle className="text-orange-500" size={18} /> :
+                                        selectedApp.status === 'Terminated' ? <XCircle className="text-slate-600" size={18} /> :
                                         <Loader2 className="animate-spin text-amber-500" size={18} />}
                                     </div>
                                     <div>
