@@ -140,6 +140,5 @@ uvicorn app.main:app --reload
 <div align="center">
 
 ### Built with precision for **LOOPLAB**. 
-Managed by **Antigravity** Framework.
 
 </div>
