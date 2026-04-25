@@ -30,10 +30,13 @@ graph TD
         C -->|Inline Preview| D[Document Artifacts]
     end
 
-    subgraph "IMS Backend (Nucleus)"
+    subgraph "IMS Logic Engine (Nucleus)"
         E[OAuth Engine] --> F[JSON API / SQLAlchemy]
         F --> G[(PostgreSQL)]
         F --> H[Asynchronous SMTP Relay]
+        F --> L{Lifecycle Manager}
+        L -->|On Selection| M[Auto-Close Other Apps]
+        L -->|On Termination| N[Trigger Specialized Alert]
     end
 
     subgraph "Staff Command Center"
@@ -43,8 +46,13 @@ graph TD
     end
 
     D -.->|Artifact Stream| F
+    M -.->|Rejection Signals| H
     H -.->|Signal| C
 ```
+
+### Application Lifecycle Protocol
+*   **Intelligent Selection:** When a candidate is marked as `Selected` for a specific role, the **Nucleus Logic Engine** automatically scans the database for other `New` or `Pending` applications from that same candidate and moves them to `Rejected` status. This ensures recruitment pipelines remain clean and prevents double-scheduling.
+*   **Specialized Outcome Streams:** Unlike standard systems, IMS differentiates between **Offer Declined** (Candidate-led) and **Terminated** (Admin-led), each triggering a unique, pre-configured automated email template to maintain professional institutional communication.
 
 ---
 
