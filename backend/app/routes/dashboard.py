@@ -33,6 +33,9 @@ async def get_dashboard_stats(
     pending = await count_by_filter(Application.status == ApplicationStatus.PENDING)
     selected = await count_by_filter(Application.status == ApplicationStatus.SELECTED)
     rejected = await count_by_filter(Application.status == ApplicationStatus.REJECTED)
+    declined = await count_by_filter(Application.status == ApplicationStatus.OFFER_DECLINED)
+    terminated = await count_by_filter(Application.status == ApplicationStatus.TERMINATED)
+
     duplicates = await count_by_filter(Application.duplicate_flag == True)
     spam = await count_by_filter(Application.spam_flag == True)
     
@@ -41,6 +44,8 @@ async def get_dashboard_stats(
         "pending_review": pending,
         "selected": selected,
         "rejected": rejected,
+        "declined": declined,
+        "terminated": terminated,
         "possible_duplicates": duplicates,
         "suspected_spam": spam
     }

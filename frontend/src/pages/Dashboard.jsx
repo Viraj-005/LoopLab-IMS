@@ -109,6 +109,8 @@ const Dashboard = () => {
     { title: 'Pending', value: stats?.pending_review, icon: 'history', trend: null, colorClass: 'text-amber-600' },
     { title: 'Selected', value: stats?.selected, icon: 'verified', trend: '+8%', colorClass: 'text-success' },
     { title: 'Rejected', value: stats?.rejected, icon: 'cancel', trend: null, colorClass: 'text-danger' },
+    { title: 'Declined', value: stats?.declined, icon: 'block', trend: null, colorClass: 'text-orange-600' },
+    { title: 'Terminated', value: stats?.terminated, icon: 'person_off', trend: null, colorClass: 'text-slate-600' },
     { title: 'Duplicates', value: stats?.possible_duplicates, icon: 'content_copy', trend: null, colorClass: 'text-orange-500' },
     { title: 'Spam Signals', value: stats?.suspected_spam, icon: 'report_gmailerrorred', trend: null, colorClass: 'text-primary-container' },
   ];

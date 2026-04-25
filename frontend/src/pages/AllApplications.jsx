@@ -145,7 +145,9 @@ const AllApplications = ({ type = 'all' }) => {
               <option value="New">Protocol: New</option>
               <option value="Pending">Protocol: Pending</option>
               <option value="Selected">Protocol: Selected</option>
-              <option value="Rejected">Protocol: Terminated</option>
+              <option value="Rejected">Protocol: Rejected</option>
+              <option value="Offer Declined">Protocol: Declined</option>
+              <option value="Terminated">Protocol: Terminated</option>
             </select>
           </div>
 

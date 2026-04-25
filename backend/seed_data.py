@@ -66,6 +66,22 @@ async def seed_data():
                 "tone": TemplateTone.FORMAL,
                 "template_type": TemplateType.REJECTED,
                 "auto_send_enabled": False
+            },
+            {
+                "name": "Offer Declined - Acknowledgment",
+                "subject": "Acknowledgment of Declined Offer - {company_name}",
+                "body": "Hi {applicant_name},\n\nWe have received your decision to decline the internship offer for the {applied_role} position. We respect your choice and wish you the best in your future endeavors.\n\nBest regards,\nHR Team",
+                "tone": TemplateTone.FRIENDLY,
+                "template_type": TemplateType.OFFER_DECLINED,
+                "auto_send_enabled": False
+            },
+            {
+                "name": "Internship Terminated",
+                "subject": "Update regarding your internship at {company_name}",
+                "body": "Hi {applicant_name},\n\nThis is to formally confirm that your internship for the {applied_role} position at {company_name} has been terminated as of today.\n\nWe will process any remaining paperwork and send it to your email shortly.\n\nBest regards,\nHR Team",
+                "tone": TemplateTone.FORMAL,
+                "template_type": TemplateType.TERMINATED,
+                "auto_send_enabled": False
             }
         ]
 

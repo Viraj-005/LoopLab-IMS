@@ -17,6 +17,8 @@ class ApplicationStatus(str, enum.Enum):
     PENDING = "Pending"
     SELECTED = "Selected"
     REJECTED = "Rejected"
+    OFFER_DECLINED = "Offer Declined"
+    TERMINATED = "Terminated"
 
 
 class ApplicationSource(str, enum.Enum):

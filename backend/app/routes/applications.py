@@ -16,7 +16,7 @@ from app.schemas.application import (
 )
 from app.services.application_service import (
     create_application, get_application, get_applications, 
-    update_application, get_unique_roles
+    update_application, get_unique_roles, auto_close_other_applications
 )
 from app.services.auth_service import get_current_staff
 from app.services.email_service import email_service
@@ -130,8 +130,14 @@ async def update_application_status(
 
         elif app_update.status == ApplicationStatus.SELECTED:
             background_tasks.add_task(email_service.send_template_email, db, app, TemplateType.SELECTED)
+            # Auto-reject other pending applications for this intern
+            background_tasks.add_task(auto_close_other_applications, db, app.id, app.email, app.applied_role, user.email)
         elif app_update.status == ApplicationStatus.REJECTED:
             background_tasks.add_task(email_service.send_template_email, db, app, TemplateType.REJECTED)
+        elif app_update.status == ApplicationStatus.OFFER_DECLINED:
+            background_tasks.add_task(email_service.send_template_email, db, app, TemplateType.OFFER_DECLINED)
+        elif app_update.status == ApplicationStatus.TERMINATED:
+            background_tasks.add_task(email_service.send_template_email, db, app, TemplateType.TERMINATED)
 
     return app
 

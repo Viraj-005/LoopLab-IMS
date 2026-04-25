@@ -23,6 +23,8 @@ class TemplateType(str, enum.Enum):
     INTERVIEW_INVITATION = "interview_invitation"
     SELECTED = "selected"
     REJECTED = "rejected"
+    OFFER_DECLINED = "offer_declined"
+    TERMINATED = "terminated"
     CUSTOM = "custom"
 
 

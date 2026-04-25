@@ -19,6 +19,7 @@ const ApplicationDetail = () => {
   const [signalBody, setSignalBody] = useState('');
   const [sendingSignal, setSendingSignal] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [confirmingStatus, setConfirmingStatus] = useState('');
   const [previewDocType, setPreviewDocType] = useState('cv'); // 'cv' or 'cover_letter'
   
   // Interview Scheduling State
@@ -55,7 +56,8 @@ const ApplicationDetail = () => {
   }, [id]);
 
   const updateStatus = async (status) => {
-    if (status === 'Rejected') {
+    if (['Rejected', 'Offer Declined', 'Terminated'].includes(status)) {
+      setConfirmingStatus(status);
       setIsRejectModalOpen(true);
       return;
     }
@@ -439,7 +441,9 @@ const ApplicationDetail = () => {
                   <option value="New">Status: New Entry</option>
                   <option value="Pending">Status: Evaluation</option>
                   <option value="Selected">Status: Authorized</option>
-                  <option value="Rejected">Status: Terminated</option>
+                  <option value="Rejected">Status: Rejected</option>
+                  <option value="Offer Declined">Status: Offer Declined</option>
+                  <option value="Terminated">Status: Terminated</option>
                 </select>
                 <span className="material-symbols-outlined absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">expand_more</span>
               </div>
@@ -568,10 +572,10 @@ const ApplicationDetail = () => {
       <ConfirmationModal
         isOpen={isRejectModalOpen}
         onClose={() => setIsRejectModalOpen(false)}
-        onConfirm={() => performStatusUpdate('Rejected')}
-        title="Terminate Applicant Stream"
-        message={`WARNING: You are about to permanently terminate the recruitment evaluation for ${app.applicant_name}. This action is irreversible.`}
-        confirmText="Confirm Termination"
+        onConfirm={() => performStatusUpdate(confirmingStatus)}
+        title={`${confirmingStatus} Protocol`}
+        message={`WARNING: You are about to mark this application as ${confirmingStatus} for ${app.applicant_name}. This will trigger an automated email.`}
+        confirmText={`Confirm ${confirmingStatus}`}
         expectedName={app.applicant_name}
         itemName="Applicant Name"
       />

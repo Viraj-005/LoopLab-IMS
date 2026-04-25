@@ -246,3 +246,49 @@ async def bulk_update_status(
         if app:
             count += 1
     return count
+
+
+async def auto_close_other_applications(
+    db: AsyncSession,
+    current_app_id: uuid.UUID,
+    email: str,
+    selected_role: str,
+    user_email: str
+) -> int:
+    """
+    Automatically reject other pending applications for an intern when they are selected for a role.
+    This runs when an application status is updated to SELECTED.
+    """
+    # Find other applications for the same email that are NOT the current one 
+    # and are in NEW or PENDING status
+    query = select(Application).where(
+        Application.email == email,
+        Application.id != current_app_id,
+        Application.status.in_([ApplicationStatus.NEW, ApplicationStatus.PENDING])
+    )
+    
+    result = await db.execute(query)
+    other_apps = result.scalars().all()
+    
+    count = 0
+    for app in other_apps:
+        old_status = app.status
+        app.status = ApplicationStatus.REJECTED
+        
+        # Add timeline entry
+        await add_timeline_entry(
+            db, app.id, ActionType.STATUS_CHANGED,
+            f"Automatically rejected because candidate was selected for {selected_role or 'another role'}.",
+            performed_by=user_email,
+            performer_type=PerformerType.ADMIN
+        )
+        
+        # Notify staff about this automatic change
+        await notify_staff_status_change(db, app, old_status, ApplicationStatus.REJECTED, "System (Auto-Selection Logic)")
+        
+        count += 1
+    
+    if count > 0:
+        await db.commit()
+        
+    return count
